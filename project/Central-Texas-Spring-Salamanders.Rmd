@@ -1,9 +1,0 @@
----
-title: "Central Texas Spring Salamanders"
-author: "Anna Kurtin"
-date: "12/10/2020"
-output: html_document
----
-
-
-<iframe src="/Central_TX_Salamanders_Review.pdf" width="100%" height="800" border="0"></iframe>

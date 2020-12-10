@@ -266,7 +266,7 @@ mean(new_data[new_data$sex==0,]$fall_time)}
 <p><img src="/project/project2_files/figure-html/Randomization%20Test-1.png" width="768" style="display: block; margin: auto;" /></p>
 <pre class="r"><code># Calculate the p-value
 mean(rand_dist&gt; 12.636 | rand_dist &lt; -12.636)</code></pre>
-<pre><code>## [1] 0.3422</code></pre>
+<pre><code>## [1] 0.3352</code></pre>
 <div id="interpreting-randomization-test" class="section level2">
 <h2>Interpreting Randomization Test</h2>
 <p>After running a randomization test, we see that the p-value is 0.348, (p&gt;0.05). This means that we fail to reject the null hypothesis, concluding that the observed difference in the time that it took for females and males to fall after recieving a tranquilizing dart was not significantly different from the null distribution.</p>
@@ -364,7 +364,7 @@ coef(boot_fit) #save coefs
 ## Get estimated SEs
 samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
 <pre><code>##   (Intercept)  dosage_c hour_hit_c dosage_c:hour_hit_c
-## 1     6.83314 0.1663272   2.548733           0.0627769</code></pre>
+## 1     7.01134 0.1708499   2.533159          0.06265718</code></pre>
 <div id="interpreting-bootstrapped-standard-errors" class="section level2">
 <h2>Interpreting Bootstrapped Standard Errors</h2>
 <p>The standard deviation of the intercept estimates is shown above under the <code>(Intercept)</code> column, the the dosage centered estimates is shown above under the <code>dosage_c</code> column, the hour hit centered estimates is shown above under the <code>hour_hit_c</code> column, and the interaction between hour hit centered and dosage centered is shown above under the <code>dosage_c:hour_hit_c</code> column. For every variable except for the hour hit centered, the bootstrapped standard errors are greater than the original or the robust standard errors. This will result in larger p-values for these variables. Additionally, the standard error for hour hit centered is smaller than the robust standard errors but still larger than the original, so the p-value using these standard errors will be larger than the original. None of the variables significance will be affected since none were significant in the original model.</p>
