@@ -10,7 +10,8 @@ tags:
   - conservation
 description: 'Have a look at the blog posts from my time in Costa Rica, including my internship with Kids Saving the Rainforest, volunteering at La Selva Biological Station, and travels. '
 ---
-*Add in a picture from costa rica, maybe from the mountain top or the view of kstr from above*
+
+![](/post/2020-12-09-kinkajou-travels-costa-rica-internship-blog_files/MeCRNew.jpg)
 
 In the fall semester of my junior year, I took part in an internship abroad with Kids Saving the Rainforest, a wildlife rescue, sanctuary, and conservation center in Quepos, Costa Rica. This fantastic study abroad experience taught me more than I could have imagined about conservation, animal care, Costa Rican history and culture, research, ecotourism and more. I maintained a blog documenting my experiences there, and while it is by no means comprehensive, it gives a good account of my time in Costa Rica. Feel free to take a look!  
 
@@ -44,3 +45,4 @@ In the fall semester of my junior year, I took part in an internship abroad with
 
 [Travel Summary Part Two](https://kinkajoutravels.blogspot.com/2020/01/travel-summary-part-two.html)
 
+![](/post/2020-12-09-kinkajou-travels-costa-rica-internship-blog_files/JacoView.jpg)

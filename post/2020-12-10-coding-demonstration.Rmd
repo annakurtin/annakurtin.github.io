@@ -1,5 +1,5 @@
 ---
-title: Coding Demonstration
+title: How I Got Into Coding
 author: ''
 date: '2020-12-10'
 slug: coding-demonstration
@@ -14,7 +14,7 @@ library(reticulate)
 
 Ah, coding. Love it or hate it, it's an essential tool in many biologists' repertoire. Going into college, I had no idea that there would be so much coding and computer work involved. In fact, if you had shown freshman year me one of my latest projects, I would have run in the other direction!
 
-![](/post/2020-12-10-coding-demonstration_files/Baby Corn Snake.jpg)
+![](/post/2020-12-10-coding-demonstration_files/blog_post.JPG)
 
 *This pretty sums up how I got into coding. Credit: unknown*
 
