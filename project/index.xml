@@ -5,7 +5,26 @@
     <link>/project/</link>
     <description>Recent content in Projects on Anna Kurtin</description>
     <generator>Hugo -- gohugo.io</generator>
-    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <language>en-US</language>
+    <lastBuildDate>Wed, 25 Nov 2020 00:00:00 +0000</lastBuildDate><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Comp Bio Project 2 Kurtin</title>
+      <link>/project/project2/</link>
+      <pubDate>Wed, 25 Nov 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>IntroductionThe data that I am using for this project comes from the Primate Molecular Ecology and Evolution Lab, with permission for use from Dr. Anthony Di Fiore. This data documents information about monkeys that were tranquilized at the Tiputini Biodiversity Station to take biological samples and place a tracking collar on the animal. There are 21 observations, meaning that there were a total of 21 monkeys darted. The columns included in this dataset are as follows:</description>
+    </item>
+    
+    <item>
+      <title>Kurtin Comp Bio Project 1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Sun, 18 Oct 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Mexican Waterfowl Count Data Across Two Two-Year Periods from iNaturalistFor my project, I am using data exported from iNaturalist, one of the largest platforms for citizen science. This data is interesting to me becuase citizen science platforms such as iNaturalist have recently been recognized for their valuable potential for science. Mobilizing every day people to collect data on the natural world has provided scientists with an unprecedented ability to monitor biodiversity on different spatial scales.</description>
+    </item>
+    
     <item>
       <title>Central Texas Spring Salamanders</title>
       <link>/project/txsalamanders/</link>
@@ -16,15 +35,6 @@
     </item>
     
     <item>
-      <title>Comp Bio Project 2 Kurtin</title>
-      <link>/project/project2/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project2/</guid>
-      <description>IntroductionThe data that I am using for this project comes from the Primate Molecular Ecology and Evolution Lab, with permission for use from Dr. Anthony Di Fiore. This data documents information about monkeys that were tranquilized at the Tiputini Biodiversity Station to take biological samples and place a tracking collar on the animal. There are 21 observations, meaning that there were a total of 21 monkeys darted. The columns included in this dataset are as follows:</description>
-    </item>
-    
-    <item>
       <title>Fall Undergraduate Research Symposium 2020 Science Slam</title>
       <link>/project/scienceslamvideo/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
@@ -32,15 +42,6 @@
       <guid>/project/scienceslamvideo/</guid>
       <description>“Science Slams” are short videos explaining research to the general public. Check out my video below, where I talk about my current research investigating the bioacoustics of howler monkey calls:
 </description>
-    </item>
-    
-    <item>
-      <title>Kurtin Comp Bio Project 1: Exploratory Data Analysis</title>
-      <link>/project/project1/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/project/project1/</guid>
-      <description>Mexican Waterfowl Count Data Across Two Two-Year Periods from iNaturalistFor my project, I am using data exported from iNaturalist, one of the largest platforms for citizen science. This data is interesting to me becuase citizen science platforms such as iNaturalist have recently been recognized for their valuable potential for science. Mobilizing every day people to collect data on the natural world has provided scientists with an unprecedented ability to monitor biodiversity on different spatial scales.</description>
     </item>
     
     <item>
