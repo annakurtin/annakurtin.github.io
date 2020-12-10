@@ -16,9 +16,9 @@ Check out some of my coding projects below:
 Or check out some previous class projects here: 
 
 
-<i class="fa fa-tasks"></i> &nbsp; [Principles of Animal Behavior Final Project](/project/AnimalBehavProj/)
+<i class="fa fa-tasks"></i> &nbsp; [Principles of Animal Behavior Final Project](/project/animalbehavproj/)
 
-<i class="fa fa-tasks"></i> &nbsp; [Central Texas Salamanders Review](/project/Central-Texas-Spring-Salamanders/)
+<i class="fa fa-tasks"></i> &nbsp; [Central Texas Salamanders Review](/project/txsalamanders/)
 
 <i class="fa fa-line-chart"></i> &nbsp; [Test](/project/project3/)
 
