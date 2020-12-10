@@ -7,6 +7,6 @@ hiderelated: true
 hidediscus: true
 ---
 
-Add in text for background. 
+This paper examines the relationship between male dominance and alternate reproductive strategies in swordtail fish. All videos used for this project are from [The Cummings Lab](https://sites.cns.utexas.edu/cummingslab/home).
 
 <iframe src="/Kurtin_AnimalBehav_FinalProjectPaper.pdf" width="100%" height="800" border="0"></iframe>
