@@ -1,0 +1,12 @@
+---
+title: "Fall Undergraduate Research Symposium 2020 Science Slam"
+author: "Anna Kurtin"
+output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
+---
+
+"Science Slams" are short videos explaining research to the general public. Check out my video below, where I talk about my current research investigating the bioacoustics of howler monkey calls:
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/cieM6Dakx4Y" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
