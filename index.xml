@@ -75,6 +75,7 @@ Throughout high school, I was infamous among my family and friends for being hop
 Or check out some previous class projects here:
  Principles of Animal Behavior Final Project
  Central Texas Salamanders Review
+ Test
   --</description>
     </item>
     
@@ -85,6 +86,16 @@ Or check out some previous class projects here:
       
       <guid>/resume/</guid>
       <description></description>
+    </item>
+    
+    <item>
+      <title>Test</title>
+      <link>/project/project3/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project3/</guid>
+      <description>R MarkdownThis is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see http://rmarkdown.rstudio.com.
+When you click the Knit button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:</description>
     </item>
     
   </channel>

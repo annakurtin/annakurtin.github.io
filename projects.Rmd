@@ -20,6 +20,9 @@ Or check out some previous class projects here:
 
 <i class="fa fa-tasks"></i> &nbsp; [Central Texas Salamanders Review](/project/Central-Texas-Spring-Salamanders/)
 
+<i class="fa fa-line-chart"></i> &nbsp; [Test](/project/project3/)
+
+
 <!--
 <i class="fa fa-pie-chart"></i> 
 <i class="fa fa-tasks"></i> 
