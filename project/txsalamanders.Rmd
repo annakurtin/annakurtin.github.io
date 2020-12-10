@@ -1,8 +1,10 @@
 ---
 title: "Central Texas Spring Salamanders"
 author: "Anna Kurtin"
-date: "12/10/2020"
 output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
 ---
 
 
