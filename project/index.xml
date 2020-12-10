@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Projects on Anna Kurtin</title>
+    <link>/project/</link>
+    <description>Recent content in Projects on Anna Kurtin</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language><atom:link href="/project/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Central Texas Spring Salamanders</title>
+      <link>/project/central-texas-spring-salamanders/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/central-texas-spring-salamanders/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Comp Bio Project 2 Kurtin</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>IntroductionThe data that I am using for this project comes from the Primate Molecular Ecology and Evolution Lab, with permission for use from Dr. Anthony Di Fiore. This data documents information about monkeys that were tranquilized at the Tiputini Biodiversity Station to take biological samples and place a tracking collar on the animal. There are 21 observations, meaning that there were a total of 21 monkeys darted. The columns included in this dataset are as follows:</description>
+    </item>
+    
+    <item>
+      <title>Kurtin Comp Bio Project 1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Mexican Waterfowl Count Data Across Two Two-Year Periods from iNaturalistFor my project, I am using data exported from iNaturalist, one of the largest platforms for citizen science. This data is interesting to me becuase citizen science platforms such as iNaturalist have recently been recognized for their valuable potential for science. Mobilizing every day people to collect data on the natural world has provided scientists with an unprecedented ability to monitor biodiversity on different spatial scales.</description>
+    </item>
+    
+    <item>
+      <title>Principles of Animal Behavior Final Project</title>
+      <link>/project/animalbehavproj/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/animalbehavproj/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

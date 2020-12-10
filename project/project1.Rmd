@@ -1,0 +1,362 @@
+---
+title: 'Kurtin Comp Bio Project 1: Exploratory Data Analysis'
+author: "Anna Kurtin"
+date: ''
+output:
+  html_document:
+    toc: yes
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+  pdf_document:
+    toc: no
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, eval = TRUE, fig.align = "center", warning = F, message = F,
+tidy=TRUE, tidy.opts=list(width.cutoff=60), R.options=list(max.print=100))
+```
+
+# Mexican Waterfowl Count Data Across Two Two-Year Periods from iNaturalist
+
+For my project, I am using data exported from iNaturalist, one of the largest platforms for citizen science. This data is interesting to me becuase citizen science platforms such as iNaturalist have recently been recognized for their valuable potential for science. Mobilizing every day people to collect data on the natural world has provided scientists with an unprecedented ability to monitor biodiversity on different spatial scales. 
+
+From the iNaturalist website, I exported all research-grade observations of wild waterfowl (family Anatidae) recorded within the country of Mexico. I was originally going to join this data with government surveys of waterfowl in Mexico, but I realized that this data only went up to 2006, while iNat wan't released until 2008. Luckily, my query from iNaturalist returned 19,826 observations, so there is plenty of data for me to work with. 
+
+The way that iNaturalist works is that individuals upload photos of organisms they see, then other users examine their observation and confirm their identification or provide a different identification. These concurring or dissenting identifications are recorded. For an observation to be considered "research grade", 2/3 of the confirmations have to be affirming the ID. The data I queried included years from 1975 to 2020, however, any observations before 2008 could not have been recorded in real-time and are unreliable. I am comparing here the combined observations of each species from 2016 and 2017 to the combined observations from 2018 to 2019. 
+
+Becuase the use of iNat expands every year, I expect to see a greater number of species observed in the later two years. However, I expect counts of each species to remain consistent throughout the two years, as I think that four years is a small enough time frame that the counts should remain fairly consistent. 
+
+```{R Importing Data}
+library(tidyverse)
+# import the iNaturalist data of waterfowl observations in Mexico
+inat <- read_csv("iNaturalist_Waterfowl_Mexico.csv")
+
+# create a value for year in the inat data
+inat <- inat %>% mutate(year = str_sub(observed_on, -4, -1))
+
+
+# filter the iNat data - select(observed_on. common_name, taxon_family_name, taxon_genus_name, num_identification_agreements, num_identification_disagreements)
+inat <- inat %>% select(year, common_name, taxon_family_name, taxon_genus_name, num_identification_agreements, num_identification_disagreements)
+
+min(inat$year)
+max(inat$year)
+
+```
+
+
+## 1. and 2. Splitting, Joining, and Tidying Data
+
+I am interested in iNaturalist data from the past four years split into two two-year periods. I am also including the number of ID agreements and disagreements so we can see if any particular species are harder to ID or are given more attention than others. Additionally, I am including the family and genus name for each species so we can compare counts at broader levels of taxonomic classification. 
+
+
+```{R Splitting Data}
+# First, we have to split the data into two separate datasets, one including observations from 2016 and 2017, the other including observations from 2018 and 2019.
+inat_f <- inat %>% filter(year == "2016"|year == "2017")
+inat_s <- inat %>% filter(year == "2018"|year == "2019")
+
+# We see that the first dataframe inat_f, which includes data from 2016 and 2017, includes 4,407 observations.  
+head(inat_f)
+# The second dataframe, inat_s, includes data from 2018 and 2019 and has 9,003 observations. 
+head(inat_s)
+```
+
+It's interesting that there are over twice as many observations in our second dataset. This is probably due to the increase in recent years of citizen science data in research, leading to encouraging collecting iNat observations via Bio Blitzes and similar iniatives. 
+
+
+However, these dataframes include multiple observations of each species. We are only interested in determining how many observations of each species were made in each two-year period, so we need to combine these observations by species.
+
+```{R Joining Data}
+# Group each dataframe by species name and take the numbers of rows as a new column called count and summarize other numeric variables of interest. One we have these in a dataset, we will group the categorical variables by species in a separate dataframe, then join them to get our data of interest from each two-year period. 
+## 2016 - 2017
+## Numeric variables
+nums_f <- inat_f %>% group_by(common_name) %>% summarize(
+  count16_17 = n(),
+  avg_id_agreements16_17 = mean(num_identification_agreements),
+  avg_id_disagreements16_17 = mean(num_identification_disagreements))
+## Categorical variables
+taxa_f <- inat_f %>% group_by(common_name) %>% mutate(family = taxon_family_name, genus = taxon_genus_name) %>% select(common_name,family,genus) %>% distinct()
+## Join these two back together based on the common name
+final_f <- inner_join(nums_f,taxa_f,by="common_name")
+## 2018 -2019
+## Numeric variables 
+nums_s <- inat_s %>% group_by(common_name) %>% summarize(
+  count18_19 = n(),
+  avg_id_agreements18_19 = mean(num_identification_agreements),
+  avg_id_disagreements18_19 = mean(num_identification_disagreements))
+## Categorical variables
+taxa_s <- inat_s %>% group_by(common_name) %>% mutate(family = taxon_family_name, genus = taxon_genus_name) %>% select(common_name,family,genus) %>% distinct()
+## Join these two back together based on the common name
+final_s <- inner_join(nums_s,taxa_s,by="common_name")
+head(final_f)
+head(final_s)
+
+# Now that we have our summarized data from each time period, we need to join them together to get our complete dataset. 
+data_uncleaned <- full_join(final_f,final_s, by="common_name")
+head(data_uncleaned)
+```
+
+The data from 2016-2017 contains 50 observations, and the data from 2018-2018 contains 57 observations. This indicates that more species were observed in the later period. I am using a full join becuase I need to be able to see if some species were seen in the first period but not the second, or vice versa. This may indicate range shifts or extinction events, so this is important data to leave in. 
+
+
+
+```{R Cleaning Data}
+
+# From this data, we see that there are much more observations from the second time period than the first. This is misleading, however, because as we noticed earlier there were way more observations total in the second time period. We need to standardize our count data by dividing it by the total observations to get an observation rate that we can compare between years. 
+data_uncleaned <- data_uncleaned %>%mutate(
+  rate16_17 = count16_17/length(inat_f$common_name), 
+  rate18_19 = count18_19/length(inat_s$common_name))
+
+
+data_uncleaned <- data_uncleaned %>% mutate(
+  rate16_17 = round(rate16_17, digits = 4),
+  rate18_19 = round(rate18_19, digits = 4),
+  avg_id_agreements16_17 = round(avg_id_agreements16_17,digits=4),
+  avg_id_disagreements16_17 = round(avg_id_disagreements16_17,digits=4),
+  avg_id_agreements18_19 = round(avg_id_agreements18_19,digits=4),
+  avg_id_disagreements18_19 = round(avg_id_disagreements18_19,digits=4))
+
+# We also need to replace the NAs currently in our count rate with zeros to show that no observations of these individuals were made in that time period. We will leave NAs in for the other varaibles so that it is clear that there is no count for these variables for that year. 
+data_uncleaned <- data_uncleaned %>% mutate(
+  rate16_17 = coalesce(rate16_17,0),
+  rate18_19 = coalesce(rate18_19,0))
+
+#I'm also adding a column for the combined average agreements in all four years and the combined disagreements in all four years
+data_uncleaned <- data_uncleaned %>% mutate(
+  combined_agree = avg_id_agreements16_17 + avg_id_agreements18_19,
+  combined_disagree = avg_id_disagreements16_17 + avg_id_disagreements18_19)
+
+
+## Some of this data is redundant (family name and genus name from each dataset), so we can clean this up a little more. 
+data_uncleaned <- data_uncleaned %>% unite(family.x,family.y)%>% unite(genus.x,genus.y)
+## The column for family all has the same value, as these observations were queried by belonging to the waterfowl group, family Anatidae. Therefore, it's not helpful to include this in our final dataset. 
+
+data_clean <- data_uncleaned %>% select(common_name,
+                                        "genus"=genus.x,
+                                        rate16_17,rate18_19,
+                                        avg_id_agreements16_17,
+                                        avg_id_disagreements16_17,
+                                        avg_id_agreements18_19,
+                                        avg_id_disagreements18_19,
+                                        combined_agree,
+                                        combined_disagree
+                                        ) 
+# One row contains a common name of "Ducks, Geese, and Swans" which is not a species, so we will remove it.
+data_clean <- data_clean %>% filter(common_name != "Ducks, Geese, and Swans")
+
+head(data_clean)
+
+#This data is clean and technically tidy, however, we can also put it into a longer, tidyer format for some of the later uses.
+data_clean_new <- data_clean %>% select(common_name,
+                                        genus,
+                                        Rate_20162017 =rate16_17,
+                                        Rate_20182019=rate18_19,
+                                        IDAgree_20162017=avg_id_agreements16_17,
+                                        IDDisagree_20162017=avg_id_disagreements16_17,
+                                        IDAgree_20182019=avg_id_agreements18_19,
+                                        IDDisagree_20182019=avg_id_disagreements18_19
+                                        ) 
+#Separate it and create a new column of year
+data_long <- data_clean_new %>% pivot_longer(cols=3:8,names_to="Variable",values_to="Value") %>% separate(Variable, into=c("Variable","Year")) %>% mutate
+head(data_long)
+                                  
+                             
+```
+
+
+
+
+## 3. Create Summary Statistics
+
+**Using all dplyr functions**
+
+```{R Exploration and Summaries}
+library(kableExtra)
+
+# Summarize all our numeric values
+## First, change the names from snake case to camel case so that it is easier to separatate them later
+## Then, pull out the numeric variables and summarize all of them
+summaries1 <- data_clean %>% 
+  rename(rate67 = rate16_17,
+         rate89 = rate18_19,
+         avgIDAgree67 = avg_id_agreements16_17,
+         avgIDDisagree67 = avg_id_disagreements16_17,
+         avgIDAgree89 = avg_id_agreements18_19, 
+         avgIDDisagree89 = avg_id_disagreements18_19,
+         CombinedIDAgree = combined_agree,
+         CombinedIDDisagree = combined_disagree) %>% 
+  select_if(is.numeric) %>% summarize_all(c(mean=mean, sd=sd,variation=var, min=min, max=max),na.rm=T) %>% round(digits = 4)
+## Now that I have the summarized data, I'm going to pivot it longer to make it easier to work with
+summaries1 <- summaries1 %>% pivot_longer(cols = 1:40, names_to="Variable", values_to ="Value")
+
+# Separate out the summary statistics for the rates of identification in the different years
+## Filter out the rows that include 'rate' (these are the rows that have the summary statistics of the rate of observation of each species), separate them into columns that indicate the rate of observation for each year, the summary statistic, and its value, then put into kable to visualize it better
+summaries1_rate <- summaries1 %>% filter(str_detect(Variable,"rate")) %>% separate(Variable,into=c("Rate","Sum_Stat")) %>% pivot_wider(names_from=Sum_Stat,values_from=Value)
+summaries1_rate %>% kbl() %>% kable_styling()
+
+# Separate out the summary statistics for the average and total agreements and disagreements in the different years
+## Filter out the rows that include 'avg' or 'combined', separate them into columns that indicate the variable for each year, the summary statistic, and its value, then put into kable to visualize it better
+summaries1_agree_dis <- summaries1 %>% filter(str_detect(Variable,"ID")) %>% separate(Variable,into=c("Agree_Dis_Value","Sum_Stat")) %>% pivot_wider(names_from=Sum_Stat,values_from=Value)
+summaries1_agree_dis %>% kbl() %>% kable_styling()
+
+# Lets also take a look at which genera were most represented in our data
+genera_obs <- data_clean %>% select(common_name,genus) %>% group_by(genus) %>% summarize("count" = n()) 
+genera_obs %>% arrange(desc(count))%>% kbl() %>% kable_styling()
+
+# Now let's look at these values grouped by genus 
+## Summarize the means of each genus
+data_clean %>% group_by(genus) %>% summarize_if(is.numeric,mean,na.rm = T) %>% kbl() %>% kable_styling()
+## Summarize the standard deviation of each genus
+data_clean %>% group_by(genus) %>% summarize_if(is.numeric,sd,na.rm = T) %>% kbl() %>% kable_styling()
+
+
+# Lets see what the differences were between common species and rare species 
+# Summarize the average rate species were observed for each year 
+means <- data_clean %>% summarize(mean16_17 = mean(rate16_17, na.rm = TRUE), mean18_19 = mean(rate18_19, na.rm = TRUE))
+mean16_17 <- means$mean16_17
+mean18_19 <- means$mean18_19
+# the average rate that each species was observed in 16-17 is 0.019996, and the average rate that each species was observed in 18-19 is 0.01753509
+
+# filter the data into the species that were observed at rates higher than the average for both years and the species that were observed at rates lower than the average for both years
+above_avg_obs <- data_clean %>% filter((rate16_17 > mean16_17)&(rate18_19 > mean18_19))
+below_avg_obs <- data_clean %>% filter((rate16_17 < mean16_17)&(rate18_19 < mean18_19))
+#We can see from this data that there are many more rare species than there are common species. This fits in with the widely accepted species rarity theory, which states that in most ecosystems there are a few species which are very common and lots of species that are relatively rare. 
+
+
+# We need to remove the NAs for datapoints that don't have any information on the number of agreements or disagreements (this would be only the below average observations)
+below_avg_obs <- below_avg_obs %>% na.omit()
+
+# We want to see if the species observed more than average for both years (common species) were more or less difficult to identify than species observed less than average for both years (rare species)
+
+common_species <- above_avg_obs %>% summarize(mean_agreements16_17 = mean(avg_id_agreements16_17), mean_agreements18_19 = mean(avg_id_agreements18_19), mean_disagreements16_17 = mean(avg_id_disagreements16_17), mean_disagreements18_19 = mean(avg_id_disagreements18_19))
+
+rare_species <- below_avg_obs %>% summarize(mean_agreements16_17 = mean(avg_id_agreements16_17), mean_agreements18_19 = mean(avg_id_agreements18_19), mean_disagreements16_17 = mean(avg_id_disagreements16_17),mean_disagreements18_19 = mean(avg_id_disagreements18_19))
+
+print(common_species)
+print(rare_species)
+
+# Now lets see what the difference was between common and rare species
+common_species$mean_agreements16_17 - rare_species$mean_agreements16_17
+common_species$mean_agreements18_19 - rare_species$mean_agreements18_19
+# there were higher average ID agreements for the rare species than for the common species
+
+common_species$mean_disagreements16_17 - rare_species$mean_disagreements16_17
+common_species$mean_disagreements18_19 - rare_species$mean_disagreements18_19
+# There were also higher average ID disagreements for the rare species than for the common species 
+
+correlation <- data_clean %>% select_if(is.numeric) %>% cor(use="pair")
+correlation %>% kbl() %>% kable_styling()
+
+```
+Between the rates at which species were observed in 2016/2017 to 2018/2019, we see that the average rate which species were observed was the same between time periods. 2016/2017 had greater standard deviations and variation of observation rates, and a greater maximum observation rate than 2018/2019, showing that the first two year period had greater spread of data. Among the average ID agree and disagree values, 2016/2017 had a greater average number of agreements, while 2018/2019 had a larger standard deviation, variation, and maximum value, showing that the second time period had greater variation in the average number of disagreements and agreements. From our exploration into generic representation, we see that the genus Anas is the most well represented in our dataset. This genus includes the "dabbling ducks" which includes many spcies such as the mallards, pintails, and teals, all species commonly see in small ponds and urban areas. It's no surprise that these were the most frequently observed, as there are many of them and they are likely to easiest to get close to and spot. The least represented genera are all either monospecific, or exhibit behavior such as diving at sea that could make them more difficult to spot and get a picture of to post on iNatralist. The genus with the highest standard deviation in the observation rate was Dendrocygna.
+
+Looking at rates of agreement and disagreement, when we look at which genus had the highest average rate of individual observation we see the the genus Spatula had the highest average rates. Anser had the lowest mean average ID agreements in 2016/2017, while Oxyura had the lowest mean average ID agreements in 2018/2019.From our exploration into the average agreements or disagreements on IDs for common vs. rare species, we see that species that were observed at rates below the average rate of observation for both years had both higher average ID agreements **and** higher ID disagreements. This could indicate that there are more IDs suggested to rare species in general, while common species are easy to identify: quickly agreed upon then ignored.
+
+**Extra Part** 
+
+*I realize that this was not part of the assignment, but I spent so long figuring it out because I thought that this was how we had to do the correlation that I wanted to leave it in. Please ignore it if you feel so inclined.*
+```{R Correlation Matrix}
+# I realize that this was not part of the assi
+library(cluster)
+
+# Correlation Matrix
+data_clean %>% column_to_rownames("common_name") %>% na.omit %>% dist %>% as.matrix
+
+#Seeing which species are the most correlated with each other
+dist_matrix <- data_clean %>% column_to_rownames("common_name") %>% na.omit %>% dist %>% as.matrix %>% head %>% as.data.frame %>% rownames_to_column("name1") %>% pivot_longer(-name1,names_to="name",values_to="dist") %>% filter(name1!= name) %>% arrange(dist)
+
+
+# Include categorical variables (Use Gower's distance/dissimilarity)
+gower <- data_clean %>% mutate_if(is.character,as.factor) %>% column_to_rownames("common_name") %>% daisy("gower") %>% as.matrix %>% as.data.frame %>% rownames_to_column("name1") %>% pivot_longer(-1,names_to="name2",values_to="gower")
+
+# See which have the greatest gower similarity or the lowest gower similarity
+data_clean %>% mutate_if(is.character,as.factor) %>% column_to_rownames("common_name") %>% daisy("gower") %>% as.matrix %>% as.data.frame %>% rownames_to_column("name1") %>% pivot_longer(-1,names_to="name2",values_to="gower") %>% filter(name1!=name2) %>% arrange(gower)
+
+```
+*This was how I interpreted the above matrices, once again please ignore if you would like to.*
+
+*Euclidean distances:*
+
+*From arranging the correlations by ascencing and descending, we see that the lowest correlation (highest distance of 7.3737) occurs between the Egyptian Goose and the Black-Bellied Whistling Duck. The highest correlation (lowest distance of 0.0617) occurs between the American Widgeon and Cinnamon Teal. *
+
+*Gower distances:*
+
+*From arranging the gower distances, which means that we are including the categorical variable genus, we see that the most strongly correlated are the Eurasian Widgeon and the Gadwall x Northern Shoveler hybrid. These two species are therefore within the same genus, are observed at similar rates between the two years, and have similar numbers of agreements and disagreements*
+
+
+
+#4. Data Visualization 
+
+**Plot 1: COrrelation Heatmap**
+  
+```{R Correlation Heatmap}
+library(ggplot2)
+
+
+correlation <- data_clean %>% select_if(is.numeric) %>% cor(use="pair")
+correlation %>% as.data.frame %>% rownames_to_column("var1") %>% pivot_longer(-1,"var2",values_to="correlation") %>% ggplot(aes(var1,var2,fill=correlation)) + geom_tile() +theme(axis.text.x = element_text(angle = 45,hjust=1)) + labs(title="Correlation Heatmap") +theme(axis.title.x = element_blank())+theme(axis.title.y = element_blank())
+```
+In this plot, we see a strong correlation between the rate of observation in 2016/2017 and the rate of observation in 2018/2019. This makes sense: bird species that are frequently observed in one time period will probably be frequently observed in the following time period. Throughout the heatmap, we see that values from the same year are more highly correlated than values from different years. This also makes sense, as we would expect to be able to predict the values better by other values from the same year than by values from a different year.  
+
+**Plot 2: Scatterplot**
+```{R Scatterplot}
+library(ggplot2)
+ggplot(data_clean, aes(x=rate16_17,y= rate18_19,color=genus)) + geom_point() + scale_x_log10() + scale_y_log10() + geom_segment(aes(x=0,y=0,xend=.1,yend=.1),color = "black") + labs(
+  title = "Rate of Observation for Each Species Between Periods",
+  x = "Log Transformed Observation Rate 2016-2017",
+  y = "Log Transformed Observation Rate 2018-2019") + theme_bw()
+```
+
+From this scatterplot, we can easily compmare the rates of observation for each species between the two time periods. The black line in the middle of the graph indicates the line that points would fall on if they were observed at the same rate in each time period. There is a lot of spread around this line for species that were observed at low rates, and a tighter fit to this line for species that were observed at higher rates. This shows that species that were observed at low rates tended to be observed more in one time period or the other, which spcies that were observed at high rates tended to be observed about the same in both time periods. Additionally, since the color of the dots corresponds to the genus, we are able to see that there is a fairly even distribution in which genera were observed the most or the least. There is no obvious cluster of secies all of the same genus that show the same rate of observation.
+
+```{R BarChart}
+#Box plot of average ID agreements and disagreements for each year
+data_long %>% filter(Variable != "Rate") %>% ggplot() + geom_boxplot(mapping=aes(x=Variable,y=Value,color=Year)) + scale_y_continuous(breaks = seq(0,8,0.5)) + theme_bw() + labs(title = "Average Agreements and Disagreements Across Periods",x = "Type of Added ID",y="Number Average Additional IDs") + scale_fill_brewer(palette ="Set3") 
+
+```
+We can see from this plot that there were a greater amount of average IDs added that agreed with the original observation in 2016/2017 than in 2018/2019. As I only queried research grade observations, this trend makes me wonder if iNaturalist relaxed the standards needed for an observation to be considered research grade after 2017. Additionally, we see that in 2018/2019 one species had an average number of ID agreements around 7. This species must often be sighted in an area with lots of iNat users. Additionally, we see that the majority of ID disagreements are around zero. This is to be expected, as I queried observations that were research grade and therefore have lots of agreements compared to few disagreements. 
+
+#5. PAM Clustering
+
+I chose to do PAM clustering because I want to incorporate the categorical variable of genus into my clusters. Additionally, PAM is more robust and more commonly used in practice than k means. 
+
+```{R K-Means Clustering}
+library(cluster)
+library(GGally)
+##1. Convert Categorical Variables to Factors
+cluster_data <- data_clean %>% mutate_if(is.character,as.factor) %>% column_to_rownames("common_name") %>% na.omit 
+
+#2. Find out how many clusters to use with silhouette width
+gower1 <- cluster_data %>% daisy(metric="gower")
+
+pam_dat<- gower1
+sil_width<-vector()
+for(i in 2:10){  
+  pam_fit <- pam(pam_dat, k = i)  
+  sil_width[i] <- pam_fit$silinfo$avg.width  
+}
+ggplot()+geom_line(aes(x=1:10,y=sil_width))+scale_x_continuous(name="k",breaks=1:10)
+
+#3. Run PAM
+pam2 <- pam(gower1,k=2,diss=TRUE)
+pam2
+
+#4. Visualize
+#pamclust<-data_clean %>% mutate(cluster=as.factor(pam2$Clustering))
+# Was not able to figure out this part, so unable to visualize it in ggplot2
+
+# Put into a graph in GGally to interpret
+## GGally will not run when genus is included, so I removed it to be able to visualize the data
+cluster_data %>% select(-genus) %>% ggpairs(cluster_data, columns=1:8, aes(color=as.factor(pam2$clustering)))
+
+#4. Check goodness-of-fit
+(plot(pam2,which=2))
+#.19 is our average silhouette width, which means that we have not in fact found a structure
+```
+From our plot of silhouette width for various sizes of clusters, we see that there are two peaks in the silhouette width: one at 2 and one at 10. I am choosing to do 2 clusters because we were told that most PAM clustering is done on 2-5 clusters. Additionally, I have 10 variables, so it would not make sense to cluster based on every single variable. From our PAM analysis, we see that the medoid for the first cluster is the Mallard, and the medoid for the second cluster is the Common Merganser. When evaluating our PAM clustering with goodness-of-fit, we see that the average silhouette width is 0.19, which means that no structure in fact was found. This could be due to the fact that few variables from my data strongly correlate with each other: for example, the average number of disagreements is not likely to explain rate of observation, number of agreements, or anything besides maybe the cumulative number of disagreements. 
+
+Although this clustering analysis very poorly explains the data, we can still pick out certain trends from the GGally plot. The strongest correlation is between the rate that each species was observed in 2016/2017 and the rate that each species was observed in 2018/2019. This makes sense, as if you see high rates of observation in one time period you would expect to also see high rates of observation in the following time period. There is also a high correlation between combined agreements and agreements in 2016/2017 and 2018/2019. Again, this makes sense because species with higher observations in each year will have higher observations in both years. 
+
+
+```
+

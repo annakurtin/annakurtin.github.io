@@ -1,0 +1,2482 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Anna Kurtin" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Kurtin Comp Bio Project 1: Exploratory Data Analysis</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/post/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project/project1/">Kurtin Comp Bio Project 1: Exploratory Data Analysis</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+<link href="/rmarkdown-libs/lightable/lightable.css" rel="stylesheet" />
+
+
+<div id="mexican-waterfowl-count-data-across-two-two-year-periods-from-inaturalist" class="section level1">
+<h1>Mexican Waterfowl Count Data Across Two Two-Year Periods from iNaturalist</h1>
+<p>For my project, I am using data exported from iNaturalist, one of the largest platforms for citizen science. This data is interesting to me becuase citizen science platforms such as iNaturalist have recently been recognized for their valuable potential for science. Mobilizing every day people to collect data on the natural world has provided scientists with an unprecedented ability to monitor biodiversity on different spatial scales.</p>
+<p>From the iNaturalist website, I exported all research-grade observations of wild waterfowl (family Anatidae) recorded within the country of Mexico. I was originally going to join this data with government surveys of waterfowl in Mexico, but I realized that this data only went up to 2006, while iNat wan’t released until 2008. Luckily, my query from iNaturalist returned 19,826 observations, so there is plenty of data for me to work with.</p>
+<p>The way that iNaturalist works is that individuals upload photos of organisms they see, then other users examine their observation and confirm their identification or provide a different identification. These concurring or dissenting identifications are recorded. For an observation to be considered “research grade”, 2/3 of the confirmations have to be affirming the ID. The data I queried included years from 1975 to 2020, however, any observations before 2008 could not have been recorded in real-time and are unreliable. I am comparing here the combined observations of each species from 2016 and 2017 to the combined observations from 2018 to 2019.</p>
+<p>Becuase the use of iNat expands every year, I expect to see a greater number of species observed in the later two years. However, I expect counts of each species to remain consistent throughout the two years, as I think that four years is a small enough time frame that the counts should remain fairly consistent.</p>
+<pre class="r"><code>library(tidyverse)
+# import the iNaturalist data of waterfowl observations in
+# Mexico
+inat &lt;- read_csv(&quot;iNaturalist_Waterfowl_Mexico.csv&quot;)
+
+# create a value for year in the inat data
+inat &lt;- inat %&gt;% mutate(year = str_sub(observed_on, -4, -1))
+
+
+# filter the iNat data - select(observed_on. common_name,
+# taxon_family_name, taxon_genus_name,
+# num_identification_agreements,
+# num_identification_disagreements)
+inat &lt;- inat %&gt;% select(year, common_name, taxon_family_name, 
+    taxon_genus_name, num_identification_agreements, num_identification_disagreements)
+
+min(inat$year)</code></pre>
+<pre><code>## [1] &quot;1975&quot;</code></pre>
+<pre class="r"><code>max(inat$year)</code></pre>
+<pre><code>## [1] &quot;2020&quot;</code></pre>
+<div id="and-2.-splitting-joining-and-tidying-data" class="section level2">
+<h2>1. and 2. Splitting, Joining, and Tidying Data</h2>
+<p>I am interested in iNaturalist data from the past four years split into two two-year periods. I am also including the number of ID agreements and disagreements so we can see if any particular species are harder to ID or are given more attention than others. Additionally, I am including the family and genus name for each species so we can compare counts at broader levels of taxonomic classification.</p>
+<pre class="r"><code># First, we have to split the data into two separate
+# datasets, one including observations from 2016 and 2017,
+# the other including observations from 2018 and 2019.
+inat_f &lt;- inat %&gt;% filter(year == &quot;2016&quot; | year == &quot;2017&quot;)
+inat_s &lt;- inat %&gt;% filter(year == &quot;2018&quot; | year == &quot;2019&quot;)
+
+# We see that the first dataframe inat_f, which includes data
+# from 2016 and 2017, includes 4,407 observations.
+head(inat_f)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   year  common_name taxon_family_na~ taxon_genus_name num_identificat~
+##   &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;chr&gt;                       &lt;dbl&gt;
+## 1 2017  American W~ Anatidae         Mareca                          6
+## 2 2017  American W~ Anatidae         Mareca                          4
+## 3 2017  Canvasback  Anatidae         Aythya                          2
+## 4 2016  Northern S~ Anatidae         Spatula                         2
+## 5 2016  Northern S~ Anatidae         Spatula                         5
+## 6 2016  Snow Goose  Anatidae         Anser                           2
+## # ... with 1 more variable: num_identification_disagreements &lt;dbl&gt;</code></pre>
+<pre class="r"><code># The second dataframe, inat_s, includes data from 2018 and
+# 2019 and has 9,003 observations.
+head(inat_s)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   year  common_name taxon_family_na~ taxon_genus_name num_identificat~
+##   &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;            &lt;chr&gt;                       &lt;dbl&gt;
+## 1 2018  Cinnamon T~ Anatidae         Spatula                         2
+## 2 2018  Cinnamon T~ Anatidae         Spatula                         2
+## 3 2018  Blue-winge~ Anatidae         Spatula                         3
+## 4 2018  Blue-winge~ Anatidae         Spatula                         2
+## 5 2018  Domestic M~ Anatidae         Anas                            2
+## 6 2018  Domestic M~ Anatidae         Anas                            2
+## # ... with 1 more variable: num_identification_disagreements &lt;dbl&gt;</code></pre>
+<p>It’s interesting that there are over twice as many observations in our second dataset. This is probably due to the increase in recent years of citizen science data in research, leading to encouraging collecting iNat observations via Bio Blitzes and similar iniatives.</p>
+<p>However, these dataframes include multiple observations of each species. We are only interested in determining how many observations of each species were made in each two-year period, so we need to combine these observations by species.</p>
+<pre class="r"><code># Group each dataframe by species name and take the numbers
+# of rows as a new column called count and summarize other
+# numeric variables of interest. One we have these in a
+# dataset, we will group the categorical variables by species
+# in a separate dataframe, then join them to get our data of
+# interest from each two-year period.  2016 - 2017 Numeric
+# variables
+nums_f &lt;- inat_f %&gt;% group_by(common_name) %&gt;% summarize(count16_17 = n(), 
+    avg_id_agreements16_17 = mean(num_identification_agreements), 
+    avg_id_disagreements16_17 = mean(num_identification_disagreements))
+## Categorical variables
+taxa_f &lt;- inat_f %&gt;% group_by(common_name) %&gt;% mutate(family = taxon_family_name, 
+    genus = taxon_genus_name) %&gt;% select(common_name, family, 
+    genus) %&gt;% distinct()
+## Join these two back together based on the common name
+final_f &lt;- inner_join(nums_f, taxa_f, by = &quot;common_name&quot;)
+## 2018 -2019 Numeric variables
+nums_s &lt;- inat_s %&gt;% group_by(common_name) %&gt;% summarize(count18_19 = n(), 
+    avg_id_agreements18_19 = mean(num_identification_agreements), 
+    avg_id_disagreements18_19 = mean(num_identification_disagreements))
+## Categorical variables
+taxa_s &lt;- inat_s %&gt;% group_by(common_name) %&gt;% mutate(family = taxon_family_name, 
+    genus = taxon_genus_name) %&gt;% select(common_name, family, 
+    genus) %&gt;% distinct()
+## Join these two back together based on the common name
+final_s &lt;- inner_join(nums_s, taxa_s, by = &quot;common_name&quot;)
+head(final_f)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   common_name     count16_17 avg_id_agreements~ avg_id_disagreeme~ family genus 
+##   &lt;chr&gt;                &lt;int&gt;              &lt;dbl&gt;              &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; 
+## 1 American Green~         77               3.32            0.0779  Anati~ Anas  
+## 2 American Wigeon        131               2.85            0.0305  Anati~ Mareca
+## 3 Black-bellied ~        626               2.47            0.00958 Anati~ Dendr~
+## 4 Black Brant              8               3.25            0       Anati~ Branta
+## 5 Blue-winged Te~        729               2.65            0.0206  Anati~ Spatu~
+## 6 Brant                   11               3.36            0       Anati~ Branta</code></pre>
+<pre class="r"><code>head(final_s)</code></pre>
+<pre><code>## # A tibble: 6 x 6
+##   common_name     count18_19 avg_id_agreements~ avg_id_disagreeme~ family genus 
+##   &lt;chr&gt;                &lt;int&gt;              &lt;dbl&gt;              &lt;dbl&gt; &lt;chr&gt;  &lt;chr&gt; 
+## 1 American Green~        152               3.01            0       Anati~ Anas  
+## 2 American Wigeon        244               1.91            0.0205  Anati~ Mareca
+## 3 Barrow&#39;s Golde~          1               4               1       Anati~ Bucep~
+## 4 Black-bellied ~       1001               1.92            0.00500 Anati~ Dendr~
+## 5 Black Brant              3               2.33            0       Anati~ Branta
+## 6 Black Swan               7               4.14            0.143   Anati~ Cygnus</code></pre>
+<pre class="r"><code># Now that we have our summarized data from each time period,
+# we need to join them together to get our complete dataset.
+data_uncleaned &lt;- full_join(final_f, final_s, by = &quot;common_name&quot;)
+head(data_uncleaned)</code></pre>
+<pre><code>## # A tibble: 6 x 11
+##   common_name count16_17 avg_id_agreemen~ avg_id_disagree~ family.x genus.x
+##   &lt;chr&gt;            &lt;int&gt;            &lt;dbl&gt;            &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;  
+## 1 American G~         77             3.32          0.0779  Anatidae Anas   
+## 2 American W~        131             2.85          0.0305  Anatidae Mareca 
+## 3 Black-bell~        626             2.47          0.00958 Anatidae Dendro~
+## 4 Black Brant          8             3.25          0       Anatidae Branta 
+## 5 Blue-winge~        729             2.65          0.0206  Anatidae Spatula
+## 6 Brant               11             3.36          0       Anatidae Branta 
+## # ... with 5 more variables: count18_19 &lt;int&gt;, avg_id_agreements18_19 &lt;dbl&gt;,
+## #   avg_id_disagreements18_19 &lt;dbl&gt;, family.y &lt;chr&gt;, genus.y &lt;chr&gt;</code></pre>
+<p>The data from 2016-2017 contains 50 observations, and the data from 2018-2018 contains 57 observations. This indicates that more species were observed in the later period. I am using a full join becuase I need to be able to see if some species were seen in the first period but not the second, or vice versa. This may indicate range shifts or extinction events, so this is important data to leave in.</p>
+<pre class="r"><code># From this data, we see that there are much more
+# observations from the second time period than the first.
+# This is misleading, however, because as we noticed earlier
+# there were way more observations total in the second time
+# period. We need to standardize our count data by dividing
+# it by the total observations to get an observation rate
+# that we can compare between years.
+data_uncleaned &lt;- data_uncleaned %&gt;% mutate(rate16_17 = count16_17/length(inat_f$common_name), 
+    rate18_19 = count18_19/length(inat_s$common_name))
+
+
+data_uncleaned &lt;- data_uncleaned %&gt;% mutate(rate16_17 = round(rate16_17, 
+    digits = 4), rate18_19 = round(rate18_19, digits = 4), avg_id_agreements16_17 = round(avg_id_agreements16_17, 
+    digits = 4), avg_id_disagreements16_17 = round(avg_id_disagreements16_17, 
+    digits = 4), avg_id_agreements18_19 = round(avg_id_agreements18_19, 
+    digits = 4), avg_id_disagreements18_19 = round(avg_id_disagreements18_19, 
+    digits = 4))
+
+# We also need to replace the NAs currently in our count rate
+# with zeros to show that no observations of these
+# individuals were made in that time period. We will leave
+# NAs in for the other varaibles so that it is clear that
+# there is no count for these variables for that year.
+data_uncleaned &lt;- data_uncleaned %&gt;% mutate(rate16_17 = coalesce(rate16_17, 
+    0), rate18_19 = coalesce(rate18_19, 0))
+
+# I&#39;m also adding a column for the combined average
+# agreements in all four years and the combined disagreements
+# in all four years
+data_uncleaned &lt;- data_uncleaned %&gt;% mutate(combined_agree = avg_id_agreements16_17 + 
+    avg_id_agreements18_19, combined_disagree = avg_id_disagreements16_17 + 
+    avg_id_disagreements18_19)
+
+
+## Some of this data is redundant (family name and genus name
+## from each dataset), so we can clean this up a little more.
+data_uncleaned &lt;- data_uncleaned %&gt;% unite(family.x, family.y) %&gt;% 
+    unite(genus.x, genus.y)
+## The column for family all has the same value, as these
+## observations were queried by belonging to the waterfowl
+## group, family Anatidae. Therefore, it&#39;s not helpful to
+## include this in our final dataset.
+
+data_clean &lt;- data_uncleaned %&gt;% select(common_name, genus = genus.x, 
+    rate16_17, rate18_19, avg_id_agreements16_17, avg_id_disagreements16_17, 
+    avg_id_agreements18_19, avg_id_disagreements18_19, combined_agree, 
+    combined_disagree)
+# One row contains a common name of &#39;Ducks, Geese, and Swans&#39;
+# which is not a species, so we will remove it.
+data_clean &lt;- data_clean %&gt;% filter(common_name != &quot;Ducks, Geese, and Swans&quot;)
+
+head(data_clean)</code></pre>
+<pre><code>## # A tibble: 6 x 10
+##   common_name genus rate16_17 rate18_19 avg_id_agreemen~ avg_id_disagree~
+##   &lt;chr&gt;       &lt;chr&gt;     &lt;dbl&gt;     &lt;dbl&gt;            &lt;dbl&gt;            &lt;dbl&gt;
+## 1 American G~ Anas     0.0175  0.0169               3.32          0.0779 
+## 2 American W~ Mare~    0.0297  0.0271               2.86          0.0305 
+## 3 Black-bell~ Dend~    0.142   0.111                2.47          0.00960
+## 4 Black Brant Bran~    0.0018  0.000300             3.25          0      
+## 5 Blue-winge~ Spat~    0.165   0.131                2.65          0.0206 
+## 6 Brant       Bran~    0.0025  0.0034               3.36          0      
+## # ... with 4 more variables: avg_id_agreements18_19 &lt;dbl&gt;,
+## #   avg_id_disagreements18_19 &lt;dbl&gt;, combined_agree &lt;dbl&gt;,
+## #   combined_disagree &lt;dbl&gt;</code></pre>
+<pre class="r"><code># This data is clean and technically tidy, however, we can
+# also put it into a longer, tidyer format for some of the
+# later uses.
+data_clean_new &lt;- data_clean %&gt;% select(common_name, genus, Rate_20162017 = rate16_17, 
+    Rate_20182019 = rate18_19, IDAgree_20162017 = avg_id_agreements16_17, 
+    IDDisagree_20162017 = avg_id_disagreements16_17, IDAgree_20182019 = avg_id_agreements18_19, 
+    IDDisagree_20182019 = avg_id_disagreements18_19)
+# Separate it and create a new column of year
+data_long &lt;- data_clean_new %&gt;% pivot_longer(cols = 3:8, names_to = &quot;Variable&quot;, 
+    values_to = &quot;Value&quot;) %&gt;% separate(Variable, into = c(&quot;Variable&quot;, 
+    &quot;Year&quot;)) %&gt;% mutate
+head(data_long)</code></pre>
+<pre><code>## # A tibble: 6 x 5
+##   common_name                genus Variable   Year      Value
+##   &lt;chr&gt;                      &lt;chr&gt; &lt;chr&gt;      &lt;chr&gt;     &lt;dbl&gt;
+## 1 American Green-winged Teal Anas  Rate       20162017 0.0175
+## 2 American Green-winged Teal Anas  Rate       20182019 0.0169
+## 3 American Green-winged Teal Anas  IDAgree    20162017 3.32  
+## 4 American Green-winged Teal Anas  IDDisagree 20162017 0.0779
+## 5 American Green-winged Teal Anas  IDAgree    20182019 3.01  
+## 6 American Green-winged Teal Anas  IDDisagree 20182019 0</code></pre>
+</div>
+<div id="create-summary-statistics" class="section level2">
+<h2>3. Create Summary Statistics</h2>
+<p><strong>Using all dplyr functions</strong></p>
+<pre class="r"><code>library(kableExtra)
+
+# Summarize all our numeric values First, change the names
+# from snake case to camel case so that it is easier to
+# separatate them later Then, pull out the numeric variables
+# and summarize all of them
+summaries1 &lt;- data_clean %&gt;% rename(rate67 = rate16_17, rate89 = rate18_19, 
+    avgIDAgree67 = avg_id_agreements16_17, avgIDDisagree67 = avg_id_disagreements16_17, 
+    avgIDAgree89 = avg_id_agreements18_19, avgIDDisagree89 = avg_id_disagreements18_19, 
+    CombinedIDAgree = combined_agree, CombinedIDDisagree = combined_disagree) %&gt;% 
+    select_if(is.numeric) %&gt;% summarize_all(c(mean = mean, sd = sd, 
+    variation = var, min = min, max = max), na.rm = T) %&gt;% round(digits = 4)
+## Now that I have the summarized data, I&#39;m going to pivot it
+## longer to make it easier to work with
+summaries1 &lt;- summaries1 %&gt;% pivot_longer(cols = 1:40, names_to = &quot;Variable&quot;, 
+    values_to = &quot;Value&quot;)
+
+# Separate out the summary statistics for the rates of
+# identification in the different years Filter out the rows
+# that include &#39;rate&#39; (these are the rows that have the
+# summary statistics of the rate of observation of each
+# species), separate them into columns that indicate the rate
+# of observation for each year, the summary statistic, and
+# its value, then put into kable to visualize it better
+summaries1_rate &lt;- summaries1 %&gt;% filter(str_detect(Variable, 
+    &quot;rate&quot;)) %&gt;% separate(Variable, into = c(&quot;Rate&quot;, &quot;Sum_Stat&quot;)) %&gt;% 
+    pivot_wider(names_from = Sum_Stat, values_from = Value)
+summaries1_rate %&gt;% kbl() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Rate
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+variation
+</th>
+<th style="text-align:right;">
+min
+</th>
+<th style="text-align:right;">
+max
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rate67
+</td>
+<td style="text-align:right;">
+0.0169
+</td>
+<td style="text-align:right;">
+0.0335
+</td>
+<td style="text-align:right;">
+0.0011
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.1654
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rate89
+</td>
+<td style="text-align:right;">
+0.0169
+</td>
+<td style="text-align:right;">
+0.0304
+</td>
+<td style="text-align:right;">
+0.0009
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0.1308
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Separate out the summary statistics for the average and
+# total agreements and disagreements in the different years
+# Filter out the rows that include &#39;avg&#39; or &#39;combined&#39;,
+# separate them into columns that indicate the variable for
+# each year, the summary statistic, and its value, then put
+# into kable to visualize it better
+summaries1_agree_dis &lt;- summaries1 %&gt;% filter(str_detect(Variable, 
+    &quot;ID&quot;)) %&gt;% separate(Variable, into = c(&quot;Agree_Dis_Value&quot;, 
+    &quot;Sum_Stat&quot;)) %&gt;% pivot_wider(names_from = Sum_Stat, values_from = Value)
+summaries1_agree_dis %&gt;% kbl() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+Agree_Dis_Value
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+sd
+</th>
+<th style="text-align:right;">
+variation
+</th>
+<th style="text-align:right;">
+min
+</th>
+<th style="text-align:right;">
+max
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+avgIDAgree67
+</td>
+<td style="text-align:right;">
+3.0249
+</td>
+<td style="text-align:right;">
+0.9602
+</td>
+<td style="text-align:right;">
+0.9219
+</td>
+<td style="text-align:right;">
+1.2500
+</td>
+<td style="text-align:right;">
+6.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avgIDDisagree67
+</td>
+<td style="text-align:right;">
+0.0689
+</td>
+<td style="text-align:right;">
+0.1901
+</td>
+<td style="text-align:right;">
+0.0361
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+<td style="text-align:right;">
+1.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avgIDAgree89
+</td>
+<td style="text-align:right;">
+2.6732
+</td>
+<td style="text-align:right;">
+1.1102
+</td>
+<td style="text-align:right;">
+1.2326
+</td>
+<td style="text-align:right;">
+1.0000
+</td>
+<td style="text-align:right;">
+7.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avgIDDisagree89
+</td>
+<td style="text-align:right;">
+0.0793
+</td>
+<td style="text-align:right;">
+0.2053
+</td>
+<td style="text-align:right;">
+0.0421
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+<td style="text-align:right;">
+1.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CombinedIDAgree
+</td>
+<td style="text-align:right;">
+5.4805
+</td>
+<td style="text-align:right;">
+1.6242
+</td>
+<td style="text-align:right;">
+2.6379
+</td>
+<td style="text-align:right;">
+2.9038
+</td>
+<td style="text-align:right;">
+10.0000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CombinedIDDisagree
+</td>
+<td style="text-align:right;">
+0.1294
+</td>
+<td style="text-align:right;">
+0.2684
+</td>
+<td style="text-align:right;">
+0.0720
+</td>
+<td style="text-align:right;">
+0.0000
+</td>
+<td style="text-align:right;">
+1.1429
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Lets also take a look at which genera were most represented
+# in our data
+genera_obs &lt;- data_clean %&gt;% select(common_name, genus) %&gt;% group_by(genus) %&gt;% 
+    summarize(count = n())
+genera_obs %&gt;% arrange(desc(count)) %&gt;% kbl() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+genus
+</th>
+<th style="text-align:right;">
+count
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Anas
+</td>
+<td style="text-align:right;">
+10
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Anser
+</td>
+<td style="text-align:right;">
+8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Spatula
+</td>
+<td style="text-align:right;">
+6
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aythya
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Branta
+</td>
+<td style="text-align:right;">
+4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bucephala
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dendrocygna
+</td>
+<td style="text-align:right;">
+3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aix
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cairina
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cygnus
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mareca
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mergus
+</td>
+<td style="text-align:right;">
+2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Alopochen
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lophodytes
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Melanitta
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nomonyx
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oxyura
+</td>
+<td style="text-align:right;">
+1
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Now let&#39;s look at these values grouped by genus Summarize
+# the means of each genus
+data_clean %&gt;% group_by(genus) %&gt;% summarize_if(is.numeric, mean, 
+    na.rm = T) %&gt;% kbl() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+genus
+</th>
+<th style="text-align:right;">
+rate16_17
+</th>
+<th style="text-align:right;">
+rate18_19
+</th>
+<th style="text-align:right;">
+avg_id_agreements16_17
+</th>
+<th style="text-align:right;">
+avg_id_disagreements16_17
+</th>
+<th style="text-align:right;">
+avg_id_agreements18_19
+</th>
+<th style="text-align:right;">
+avg_id_disagreements18_19
+</th>
+<th style="text-align:right;">
+combined_agree
+</th>
+<th style="text-align:right;">
+combined_disagree
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Aix
+</td>
+<td style="text-align:right;">
+0.0041000
+</td>
+<td style="text-align:right;">
+0.0037500
+</td>
+<td style="text-align:right;">
+3.777800
+</td>
+<td style="text-align:right;">
+0.0278000
+</td>
+<td style="text-align:right;">
+3.356450
+</td>
+<td style="text-align:right;">
+0.3333500
+</td>
+<td style="text-align:right;">
+6.824000
+</td>
+<td style="text-align:right;">
+0.0278000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Alopochen
+</td>
+<td style="text-align:right;">
+0.0002000
+</td>
+<td style="text-align:right;">
+0.0008000
+</td>
+<td style="text-align:right;">
+6.000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+4.000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+10.000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Anas
+</td>
+<td style="text-align:right;">
+0.0222000
+</td>
+<td style="text-align:right;">
+0.0275600
+</td>
+<td style="text-align:right;">
+3.006000
+</td>
+<td style="text-align:right;">
+0.0321222
+</td>
+<td style="text-align:right;">
+2.692340
+</td>
+<td style="text-align:right;">
+0.1402500
+</td>
+<td style="text-align:right;">
+5.886378
+</td>
+<td style="text-align:right;">
+0.1879556
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Anser
+</td>
+<td style="text-align:right;">
+0.0038000
+</td>
+<td style="text-align:right;">
+0.0048000
+</td>
+<td style="text-align:right;">
+2.320843
+</td>
+<td style="text-align:right;">
+0.1447857
+</td>
+<td style="text-align:right;">
+2.183475
+</td>
+<td style="text-align:right;">
+0.0622750
+</td>
+<td style="text-align:right;">
+4.359100
+</td>
+<td style="text-align:right;">
+0.2159571
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aythya
+</td>
+<td style="text-align:right;">
+0.0142400
+</td>
+<td style="text-align:right;">
+0.0095800
+</td>
+<td style="text-align:right;">
+2.408780
+</td>
+<td style="text-align:right;">
+0.0298400
+</td>
+<td style="text-align:right;">
+2.164880
+</td>
+<td style="text-align:right;">
+0.0722800
+</td>
+<td style="text-align:right;">
+4.573660
+</td>
+<td style="text-align:right;">
+0.1021200
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Branta
+</td>
+<td style="text-align:right;">
+0.0013250
+</td>
+<td style="text-align:right;">
+0.0011500
+</td>
+<td style="text-align:right;">
+3.903400
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+1.984250
+</td>
+<td style="text-align:right;">
+0.0080750
+</td>
+<td style="text-align:right;">
+5.887650
+</td>
+<td style="text-align:right;">
+0.0080750
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bucephala
+</td>
+<td style="text-align:right;">
+0.0046333
+</td>
+<td style="text-align:right;">
+0.0079333
+</td>
+<td style="text-align:right;">
+3.086200
+</td>
+<td style="text-align:right;">
+0.0172500
+</td>
+<td style="text-align:right;">
+3.006300
+</td>
+<td style="text-align:right;">
+0.3333333
+</td>
+<td style="text-align:right;">
+5.595650
+</td>
+<td style="text-align:right;">
+0.0172500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cairina
+</td>
+<td style="text-align:right;">
+0.0243000
+</td>
+<td style="text-align:right;">
+0.0348500
+</td>
+<td style="text-align:right;">
+2.547500
+</td>
+<td style="text-align:right;">
+0.0442500
+</td>
+<td style="text-align:right;">
+2.060100
+</td>
+<td style="text-align:right;">
+0.0180000
+</td>
+<td style="text-align:right;">
+4.607600
+</td>
+<td style="text-align:right;">
+0.0622500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cygnus
+</td>
+<td style="text-align:right;">
+0.0001000
+</td>
+<td style="text-align:right;">
+0.0008000
+</td>
+<td style="text-align:right;">
+4.000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+3.928600
+</td>
+<td style="text-align:right;">
+0.0714500
+</td>
+<td style="text-align:right;">
+7.714300
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dendrocygna
+</td>
+<td style="text-align:right;">
+0.0506667
+</td>
+<td style="text-align:right;">
+0.0417333
+</td>
+<td style="text-align:right;">
+2.374133
+</td>
+<td style="text-align:right;">
+0.0187000
+</td>
+<td style="text-align:right;">
+1.772567
+</td>
+<td style="text-align:right;">
+0.0153333
+</td>
+<td style="text-align:right;">
+4.146700
+</td>
+<td style="text-align:right;">
+0.0340333
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lophodytes
+</td>
+<td style="text-align:right;">
+0.0011000
+</td>
+<td style="text-align:right;">
+0.0013000
+</td>
+<td style="text-align:right;">
+3.600000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+2.916700
+</td>
+<td style="text-align:right;">
+0.0833000
+</td>
+<td style="text-align:right;">
+6.516700
+</td>
+<td style="text-align:right;">
+0.0833000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mareca
+</td>
+<td style="text-align:right;">
+0.0347000
+</td>
+<td style="text-align:right;">
+0.0317500
+</td>
+<td style="text-align:right;">
+2.724650
+</td>
+<td style="text-align:right;">
+0.0352500
+</td>
+<td style="text-align:right;">
+1.908650
+</td>
+<td style="text-align:right;">
+0.0209000
+</td>
+<td style="text-align:right;">
+4.633300
+</td>
+<td style="text-align:right;">
+0.0561500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Melanitta
+</td>
+<td style="text-align:right;">
+0.0032000
+</td>
+<td style="text-align:right;">
+0.0014000
+</td>
+<td style="text-align:right;">
+3.714300
+</td>
+<td style="text-align:right;">
+0.0714000
+</td>
+<td style="text-align:right;">
+2.692300
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+6.406600
+</td>
+<td style="text-align:right;">
+0.0714000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mergus
+</td>
+<td style="text-align:right;">
+0.0033000
+</td>
+<td style="text-align:right;">
+0.0020000
+</td>
+<td style="text-align:right;">
+3.607150
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+3.056650
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+6.663800
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+0.0001200
+</td>
+<td style="text-align:right;">
+0.0003600
+</td>
+<td style="text-align:right;">
+3.333333
+</td>
+<td style="text-align:right;">
+0.3333333
+</td>
+<td style="text-align:right;">
+4.119033
+</td>
+<td style="text-align:right;">
+0.0476333
+</td>
+<td style="text-align:right;">
+8.357100
+</td>
+<td style="text-align:right;">
+1.1429000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nomonyx
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.0002000
+</td>
+<td style="text-align:right;">
+NaN
+</td>
+<td style="text-align:right;">
+NaN
+</td>
+<td style="text-align:right;">
+7.000000
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+NaN
+</td>
+<td style="text-align:right;">
+NaN
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oxyura
+</td>
+<td style="text-align:right;">
+0.0619000
+</td>
+<td style="text-align:right;">
+0.0666000
+</td>
+<td style="text-align:right;">
+2.509200
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+1.608300
+</td>
+<td style="text-align:right;">
+0.0083000
+</td>
+<td style="text-align:right;">
+4.117500
+</td>
+<td style="text-align:right;">
+0.0083000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Spatula
+</td>
+<td style="text-align:right;">
+0.0508000
+</td>
+<td style="text-align:right;">
+0.0442667
+</td>
+<td style="text-align:right;">
+3.152225
+</td>
+<td style="text-align:right;">
+0.1433000
+</td>
+<td style="text-align:right;">
+2.614750
+</td>
+<td style="text-align:right;">
+0.0093667
+</td>
+<td style="text-align:right;">
+5.574350
+</td>
+<td style="text-align:right;">
+0.1573500
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code>## Summarize the standard deviation of each genus
+data_clean %&gt;% group_by(genus) %&gt;% summarize_if(is.numeric, sd, 
+    na.rm = T) %&gt;% kbl() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+genus
+</th>
+<th style="text-align:right;">
+rate16_17
+</th>
+<th style="text-align:right;">
+rate18_19
+</th>
+<th style="text-align:right;">
+avg_id_agreements16_17
+</th>
+<th style="text-align:right;">
+avg_id_disagreements16_17
+</th>
+<th style="text-align:right;">
+avg_id_agreements18_19
+</th>
+<th style="text-align:right;">
+avg_id_disagreements18_19
+</th>
+<th style="text-align:right;">
+combined_agree
+</th>
+<th style="text-align:right;">
+combined_disagree
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Aix
+</td>
+<td style="text-align:right;">
+0.0057983
+</td>
+<td style="text-align:right;">
+0.0048790
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.4387598
+</td>
+<td style="text-align:right;">
+0.4714281
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Alopochen
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Anas
+</td>
+<td style="text-align:right;">
+0.0310612
+</td>
+<td style="text-align:right;">
+0.0354547
+</td>
+<td style="text-align:right;">
+0.9025650
+</td>
+<td style="text-align:right;">
+0.0327996
+</td>
+<td style="text-align:right;">
+1.1989715
+</td>
+<td style="text-align:right;">
+0.3077992
+</td>
+<td style="text-align:right;">
+1.8023640
+</td>
+<td style="text-align:right;">
+0.3109421
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Anser
+</td>
+<td style="text-align:right;">
+0.0044468
+</td>
+<td style="text-align:right;">
+0.0066205
+</td>
+<td style="text-align:right;">
+0.9389821
+</td>
+<td style="text-align:right;">
+0.2947551
+</td>
+<td style="text-align:right;">
+0.7689410
+</td>
+<td style="text-align:right;">
+0.1017370
+</td>
+<td style="text-align:right;">
+1.6069203
+</td>
+<td style="text-align:right;">
+0.3974658
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Aythya
+</td>
+<td style="text-align:right;">
+0.0106674
+</td>
+<td style="text-align:right;">
+0.0073629
+</td>
+<td style="text-align:right;">
+0.3727135
+</td>
+<td style="text-align:right;">
+0.0402998
+</td>
+<td style="text-align:right;">
+0.4308984
+</td>
+<td style="text-align:right;">
+0.1009226
+</td>
+<td style="text-align:right;">
+0.7567521
+</td>
+<td style="text-align:right;">
+0.1405267
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Branta
+</td>
+<td style="text-align:right;">
+0.0009946
+</td>
+<td style="text-align:right;">
+0.0015286
+</td>
+<td style="text-align:right;">
+1.0692955
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.6922519
+</td>
+<td style="text-align:right;">
+0.0161500
+</td>
+<td style="text-align:right;">
+1.5306626
+</td>
+<td style="text-align:right;">
+0.0161500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bucephala
+</td>
+<td style="text-align:right;">
+0.0074272
+</td>
+<td style="text-align:right;">
+0.0134812
+</td>
+<td style="text-align:right;">
+0.1219052
+</td>
+<td style="text-align:right;">
+0.0243952
+</td>
+<td style="text-align:right;">
+0.9905650
+</td>
+<td style="text-align:right;">
+0.5773503
+</td>
+<td style="text-align:right;">
+0.5718373
+</td>
+<td style="text-align:right;">
+0.0243952
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cairina
+</td>
+<td style="text-align:right;">
+0.0144250
+</td>
+<td style="text-align:right;">
+0.0292035
+</td>
+<td style="text-align:right;">
+0.0444063
+</td>
+<td style="text-align:right;">
+0.0398101
+</td>
+<td style="text-align:right;">
+0.2176475
+</td>
+<td style="text-align:right;">
+0.0254558
+</td>
+<td style="text-align:right;">
+0.2620538
+</td>
+<td style="text-align:right;">
+0.0652660
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Cygnus
+</td>
+<td style="text-align:right;">
+0.0001414
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+0.3030660
+</td>
+<td style="text-align:right;">
+0.1010456
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Dendrocygna
+</td>
+<td style="text-align:right;">
+0.0792425
+</td>
+<td style="text-align:right;">
+0.0605209
+</td>
+<td style="text-align:right;">
+0.3362764
+</td>
+<td style="text-align:right;">
+0.0245493
+</td>
+<td style="text-align:right;">
+0.2361610
+</td>
+<td style="text-align:right;">
+0.0223681
+</td>
+<td style="text-align:right;">
+0.5661389
+</td>
+<td style="text-align:right;">
+0.0468754
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Lophodytes
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mareca
+</td>
+<td style="text-align:right;">
+0.0070711
+</td>
+<td style="text-align:right;">
+0.0065761
+</td>
+<td style="text-align:right;">
+0.1843427
+</td>
+<td style="text-align:right;">
+0.0067175
+</td>
+<td style="text-align:right;">
+0.0041719
+</td>
+<td style="text-align:right;">
+0.0005657
+</td>
+<td style="text-align:right;">
+0.1801708
+</td>
+<td style="text-align:right;">
+0.0072832
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Melanitta
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Mergus
+</td>
+<td style="text-align:right;">
+0.0024042
+</td>
+<td style="text-align:right;">
+0.0016971
+</td>
+<td style="text-align:right;">
+0.1515330
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.3239256
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+<td style="text-align:right;">
+0.4754586
+</td>
+<td style="text-align:right;">
+0.0000000
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+0.0001095
+</td>
+<td style="text-align:right;">
+0.0006950
+</td>
+<td style="text-align:right;">
+1.5275252
+</td>
+<td style="text-align:right;">
+0.5773503
+</td>
+<td style="text-align:right;">
+0.8278930
+</td>
+<td style="text-align:right;">
+0.0825034
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Nomonyx
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Oxyura
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+<td style="text-align:right;">
+NA
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Spatula
+</td>
+<td style="text-align:right;">
+0.0680112
+</td>
+<td style="text-align:right;">
+0.0559013
+</td>
+<td style="text-align:right;">
+0.4661849
+</td>
+<td style="text-align:right;">
+0.2380306
+</td>
+<td style="text-align:right;">
+0.8648520
+</td>
+<td style="text-align:right;">
+0.0107853
+</td>
+<td style="text-align:right;">
+1.1173655
+</td>
+<td style="text-align:right;">
+0.2286550
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># Lets see what the differences were between common species
+# and rare species Summarize the average rate species were
+# observed for each year
+means &lt;- data_clean %&gt;% summarize(mean16_17 = mean(rate16_17, 
+    na.rm = TRUE), mean18_19 = mean(rate18_19, na.rm = TRUE))
+mean16_17 &lt;- means$mean16_17
+mean18_19 &lt;- means$mean18_19
+# the average rate that each species was observed in 16-17 is
+# 0.019996, and the average rate that each species was
+# observed in 18-19 is 0.01753509
+
+# filter the data into the species that were observed at
+# rates higher than the average for both years and the
+# species that were observed at rates lower than the average
+# for both years
+above_avg_obs &lt;- data_clean %&gt;% filter((rate16_17 &gt; mean16_17) &amp; 
+    (rate18_19 &gt; mean18_19))
+below_avg_obs &lt;- data_clean %&gt;% filter((rate16_17 &lt; mean16_17) &amp; 
+    (rate18_19 &lt; mean18_19))
+# We can see from this data that there are many more rare
+# species than there are common species. This fits in with
+# the widely accepted species rarity theory, which states
+# that in most ecosystems there are a few species which are
+# very common and lots of species that are relatively rare.
+
+
+# We need to remove the NAs for datapoints that don&#39;t have
+# any information on the number of agreements or
+# disagreements (this would be only the below average
+# observations)
+below_avg_obs &lt;- below_avg_obs %&gt;% na.omit()
+
+# We want to see if the species observed more than average
+# for both years (common species) were more or less difficult
+# to identify than species observed less than average for
+# both years (rare species)
+
+common_species &lt;- above_avg_obs %&gt;% summarize(mean_agreements16_17 = mean(avg_id_agreements16_17), 
+    mean_agreements18_19 = mean(avg_id_agreements18_19), mean_disagreements16_17 = mean(avg_id_disagreements16_17), 
+    mean_disagreements18_19 = mean(avg_id_disagreements18_19))
+
+rare_species &lt;- below_avg_obs %&gt;% summarize(mean_agreements16_17 = mean(avg_id_agreements16_17), 
+    mean_agreements18_19 = mean(avg_id_agreements18_19), mean_disagreements16_17 = mean(avg_id_disagreements16_17), 
+    mean_disagreements18_19 = mean(avg_id_disagreements18_19))
+
+print(common_species)</code></pre>
+<pre><code>## # A tibble: 1 x 4
+##   mean_agreements16~ mean_agreements18~ mean_disagreements1~ mean_disagreements~
+##                &lt;dbl&gt;              &lt;dbl&gt;                &lt;dbl&gt;               &lt;dbl&gt;
+## 1               2.78               2.22               0.0346              0.0280</code></pre>
+<pre class="r"><code>print(rare_species)</code></pre>
+<pre><code>## # A tibble: 1 x 4
+##   mean_agreements16~ mean_agreements18~ mean_disagreements1~ mean_disagreements~
+##                &lt;dbl&gt;              &lt;dbl&gt;                &lt;dbl&gt;               &lt;dbl&gt;
+## 1               3.13               2.52               0.0935              0.0763</code></pre>
+<pre class="r"><code># Now lets see what the difference was between common and
+# rare species
+common_species$mean_agreements16_17 - rare_species$mean_agreements16_17</code></pre>
+<pre><code>## [1] -0.3423393</code></pre>
+<pre class="r"><code>common_species$mean_agreements18_19 - rare_species$mean_agreements18_19</code></pre>
+<pre><code>## [1] -0.2986774</code></pre>
+<pre class="r"><code># there were higher average ID agreements for the rare
+# species than for the common species
+
+common_species$mean_disagreements16_17 - rare_species$mean_disagreements16_17</code></pre>
+<pre><code>## [1] -0.05882857</code></pre>
+<pre class="r"><code>common_species$mean_disagreements18_19 - rare_species$mean_disagreements18_19</code></pre>
+<pre><code>## [1] -0.04826071</code></pre>
+<pre class="r"><code># There were also higher average ID disagreements for the
+# rare species than for the common species
+
+correlation &lt;- data_clean %&gt;% select_if(is.numeric) %&gt;% cor(use = &quot;pair&quot;)
+correlation %&gt;% kbl() %&gt;% kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+rate16_17
+</th>
+<th style="text-align:right;">
+rate18_19
+</th>
+<th style="text-align:right;">
+avg_id_agreements16_17
+</th>
+<th style="text-align:right;">
+avg_id_disagreements16_17
+</th>
+<th style="text-align:right;">
+avg_id_agreements18_19
+</th>
+<th style="text-align:right;">
+avg_id_disagreements18_19
+</th>
+<th style="text-align:right;">
+combined_agree
+</th>
+<th style="text-align:right;">
+combined_disagree
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+rate16_17
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.9703538
+</td>
+<td style="text-align:right;">
+-0.1664025
+</td>
+<td style="text-align:right;">
+-0.1089619
+</td>
+<td style="text-align:right;">
+-0.2412446
+</td>
+<td style="text-align:right;">
+-0.1309013
+</td>
+<td style="text-align:right;">
+-0.2085786
+</td>
+<td style="text-align:right;">
+-0.1515214
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+rate18_19
+</td>
+<td style="text-align:right;">
+0.9703538
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+-0.1681150
+</td>
+<td style="text-align:right;">
+-0.1034925
+</td>
+<td style="text-align:right;">
+-0.2423603
+</td>
+<td style="text-align:right;">
+-0.1353941
+</td>
+<td style="text-align:right;">
+-0.2042746
+</td>
+<td style="text-align:right;">
+-0.1482598
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avg_id_agreements16_17
+</td>
+<td style="text-align:right;">
+-0.1664025
+</td>
+<td style="text-align:right;">
+-0.1681150
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.2165890
+</td>
+<td style="text-align:right;">
+0.6635226
+</td>
+<td style="text-align:right;">
+-0.0507672
+</td>
+<td style="text-align:right;">
+0.9276722
+</td>
+<td style="text-align:right;">
+0.1231156
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avg_id_disagreements16_17
+</td>
+<td style="text-align:right;">
+-0.1089619
+</td>
+<td style="text-align:right;">
+-0.1034925
+</td>
+<td style="text-align:right;">
+0.2165890
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.1556308
+</td>
+<td style="text-align:right;">
+0.1788552
+</td>
+<td style="text-align:right;">
+0.2036343
+</td>
+<td style="text-align:right;">
+0.8243037
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avg_id_agreements18_19
+</td>
+<td style="text-align:right;">
+-0.2412446
+</td>
+<td style="text-align:right;">
+-0.2423603
+</td>
+<td style="text-align:right;">
+0.6635226
+</td>
+<td style="text-align:right;">
+0.1556308
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.1638473
+</td>
+<td style="text-align:right;">
+0.8948897
+</td>
+<td style="text-align:right;">
+0.1664303
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+avg_id_disagreements18_19
+</td>
+<td style="text-align:right;">
+-0.1309013
+</td>
+<td style="text-align:right;">
+-0.1353941
+</td>
+<td style="text-align:right;">
+-0.0507672
+</td>
+<td style="text-align:right;">
+0.1788552
+</td>
+<td style="text-align:right;">
+0.1638473
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.0166918
+</td>
+<td style="text-align:right;">
+0.7044500
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+combined_agree
+</td>
+<td style="text-align:right;">
+-0.2085786
+</td>
+<td style="text-align:right;">
+-0.2042746
+</td>
+<td style="text-align:right;">
+0.9276722
+</td>
+<td style="text-align:right;">
+0.2036343
+</td>
+<td style="text-align:right;">
+0.8948897
+</td>
+<td style="text-align:right;">
+0.0166918
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+<td style="text-align:right;">
+0.1565038
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+combined_disagree
+</td>
+<td style="text-align:right;">
+-0.1515214
+</td>
+<td style="text-align:right;">
+-0.1482598
+</td>
+<td style="text-align:right;">
+0.1231156
+</td>
+<td style="text-align:right;">
+0.8243037
+</td>
+<td style="text-align:right;">
+0.1664303
+</td>
+<td style="text-align:right;">
+0.7044500
+</td>
+<td style="text-align:right;">
+0.1565038
+</td>
+<td style="text-align:right;">
+1.0000000
+</td>
+</tr>
+</tbody>
+</table>
+<p>Between the rates at which species were observed in 2016/2017 to 2018/2019, we see that the average rate which species were observed was the same between time periods. 2016/2017 had greater standard deviations and variation of observation rates, and a greater maximum observation rate than 2018/2019, showing that the first two year period had greater spread of data. Among the average ID agree and disagree values, 2016/2017 had a greater average number of agreements, while 2018/2019 had a larger standard deviation, variation, and maximum value, showing that the second time period had greater variation in the average number of disagreements and agreements. From our exploration into generic representation, we see that the genus Anas is the most well represented in our dataset. This genus includes the “dabbling ducks” which includes many spcies such as the mallards, pintails, and teals, all species commonly see in small ponds and urban areas. It’s no surprise that these were the most frequently observed, as there are many of them and they are likely to easiest to get close to and spot. The least represented genera are all either monospecific, or exhibit behavior such as diving at sea that could make them more difficult to spot and get a picture of to post on iNatralist. The genus with the highest standard deviation in the observation rate was Dendrocygna.</p>
+<p>Looking at rates of agreement and disagreement, when we look at which genus had the highest average rate of individual observation we see the the genus Spatula had the highest average rates. Anser had the lowest mean average ID agreements in 2016/2017, while Oxyura had the lowest mean average ID agreements in 2018/2019.From our exploration into the average agreements or disagreements on IDs for common vs. rare species, we see that species that were observed at rates below the average rate of observation for both years had both higher average ID agreements <strong>and</strong> higher ID disagreements. This could indicate that there are more IDs suggested to rare species in general, while common species are easy to identify: quickly agreed upon then ignored.</p>
+<p><strong>Extra Part</strong></p>
+<p><em>I realize that this was not part of the assignment, but I spent so long figuring it out because I thought that this was how we had to do the correlation that I wanted to leave it in. Please ignore it if you feel so inclined.</em></p>
+<pre class="r"><code># I realize that this was not part of the assi
+library(cluster)
+
+# Correlation Matrix
+data_clean %&gt;% column_to_rownames(&quot;common_name&quot;) %&gt;% na.omit %&gt;% 
+    dist %&gt;% as.matrix</code></pre>
+<pre><code>##                                       American Green-winged Teal
+## American Green-winged Teal                             0.0000000
+## American Wigeon                                        2.1049168
+##                                       American Wigeon
+## American Green-winged Teal                  2.1049168
+## American Wigeon                             0.0000000
+##                                       Black-bellied Whistling-Duck Black Brant
+## American Green-winged Teal                               2.5477977   1.0868140
+## American Wigeon                                          0.5891433   1.0717317
+##                                       Blue-winged Teal     Brant Bufflehead
+## American Green-winged Teal                   2.4363466 1.4467966  1.6191486
+## American Wigeon                              0.4095031 0.8752222  0.5809156
+##                                       Cackling Goose Canada Goose Canvasback
+## American Green-winged Teal                  2.899754     2.989637  2.7796733
+## American Wigeon                             1.213895     4.550394  1.0571595
+##                                       Cinnamon Teal Common Goldeneye
+## American Green-winged Teal                2.1530989        0.5114084
+## American Wigeon                           0.0617470        1.7620685
+##                                       Common Merganser Domestic Greylag Goose
+## American Green-winged Teal                   0.8727562              1.8542582
+## American Wigeon                              2.9360740              3.8688965
+##                                       Domestic Mallard Domestic Muscovy Duck
+## American Green-winged Teal                   1.4018574             2.0085439
+## American Wigeon                              1.0834229             0.4480422
+##                                       Domestic Swan Goose Egyptian Goose
+## American Green-winged Teal                      2.9862717       4.924328
+## American Wigeon                                 1.1905099       6.851971
+##                                       Fulvous Whistling-Duck    Gadwall
+## American Green-winged Teal                        2.34275514 2.39677975
+## American Wigeon                                   0.31349717 0.38725836
+##                                       Greater Scaup Greater White-fronted Goose
+## American Green-winged Teal                0.8576535                   4.0053125
+## American Wigeon                           1.5438748                   1.9646640
+##                                       Green-winged Teal Greylag × Swan Goose
+## American Green-winged Teal                    0.7712502             2.378616
+## American Wigeon                               1.5374657             1.475674
+##                                       Greylag Goose Hooded Merganser
+## American Green-winged Teal                4.4947276        0.3833381
+## American Wigeon                           2.6182957        2.2916355
+##                                       Lesser Scaup   Mallard
+## American Green-winged Teal               3.3905621 1.9111109
+## American Wigeon                          1.4295774 0.2026879
+##                                       Mallard × Mexican Duck
+## American Green-winged Teal                          1.528492
+## American Wigeon                                     2.279046
+##                                       Mallard × Muscovy Duck
+## American Green-winged Teal                          3.183308
+## American Wigeon                                     4.951177
+##                                       Mallards, Pintails, and Allies
+## American Green-winged Teal                                  2.771572
+## American Wigeon                                             4.754590
+##                                       Mexican Duck Mottled Duck Muscovy Duck
+## American Green-winged Teal               3.5420376    3.3560916    2.5002043
+## American Wigeon                          1.6465986    1.4230294    0.5104668
+##                                       Mute Swan
+## American Green-winged Teal            1.7920900
+## American Wigeon                       3.8697857
+##                                       Northern Black-bellied Whistling-Duck
+## American Green-winged Teal                                        3.6911872
+## American Wigeon                                                   1.6738671
+##                                       Northern Pintail Northern Shoveler
+## American Green-winged Teal                    3.605887         0.4087785
+## American Wigeon                               5.646955         2.3737498
+##                                       Red-breasted Merganser    Redhead
+## American Green-winged Teal                         0.2957784 2.34618868
+## American Wigeon                                    2.0474404 0.39322705
+##                                       Ring-necked Duck Ruddy Duck
+## American Green-winged Teal                   2.2447163  2.9210326
+## American Wigeon                              0.4566084  0.8400202
+##                                       Shovelers and Allies Snow Goose
+## American Green-winged Teal                       0.6825320  3.1705490
+## American Wigeon                                  2.3865361  1.1659560
+##                                       Surf Scoter Swan Goose Wood Duck
+## American Green-winged Teal              0.5408471  3.2575763 0.7098364
+## American Wigeon                         2.1398000  1.3424188 2.6856559
+##  [ reached getOption(&quot;max.print&quot;) -- omitted 45 rows ]</code></pre>
+<pre class="r"><code># Seeing which species are the most correlated with each
+# other
+dist_matrix &lt;- data_clean %&gt;% column_to_rownames(&quot;common_name&quot;) %&gt;% 
+    na.omit %&gt;% dist %&gt;% as.matrix %&gt;% head %&gt;% as.data.frame %&gt;% 
+    rownames_to_column(&quot;name1&quot;) %&gt;% pivot_longer(-name1, names_to = &quot;name&quot;, 
+    values_to = &quot;dist&quot;) %&gt;% filter(name1 != name) %&gt;% arrange(dist)
+
+
+# Include categorical variables (Use Gower&#39;s
+# distance/dissimilarity)
+gower &lt;- data_clean %&gt;% mutate_if(is.character, as.factor) %&gt;% 
+    column_to_rownames(&quot;common_name&quot;) %&gt;% daisy(&quot;gower&quot;) %&gt;% 
+    as.matrix %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;name1&quot;) %&gt;% 
+    pivot_longer(-1, names_to = &quot;name2&quot;, values_to = &quot;gower&quot;)
+
+# See which have the greatest gower similarity or the lowest
+# gower similarity
+data_clean %&gt;% mutate_if(is.character, as.factor) %&gt;% column_to_rownames(&quot;common_name&quot;) %&gt;% 
+    daisy(&quot;gower&quot;) %&gt;% as.matrix %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;name1&quot;) %&gt;% 
+    pivot_longer(-1, names_to = &quot;name2&quot;, values_to = &quot;gower&quot;) %&gt;% 
+    filter(name1 != name2) %&gt;% arrange(gower)</code></pre>
+<pre><code>## # A tibble: 3,422 x 3
+##    name1                         name2                            gower
+##    &lt;chr&gt;                         &lt;chr&gt;                            &lt;dbl&gt;
+##  1 Eurasian Wigeon               Gadwall × Northern Shoveler   0.000658
+##  2 Eurasian Wigeon               Greylag × Canada Goose hybrid 0.000658
+##  3 Pacific White-fronted Goose   Gadwall × Northern Shoveler   0.000658
+##  4 Pacific White-fronted Goose   Greylag × Canada Goose hybrid 0.000658
+##  5 Gadwall × Northern Shoveler   Eurasian Wigeon               0.000658
+##  6 Gadwall × Northern Shoveler   Pacific White-fronted Goose   0.000658
+##  7 Greylag × Canada Goose hybrid Eurasian Wigeon               0.000658
+##  8 Greylag × Canada Goose hybrid Pacific White-fronted Goose   0.000658
+##  9 Redhead                       Ring-necked Duck              0.0148  
+## 10 Ring-necked Duck              Redhead                       0.0148  
+## # ... with 3,412 more rows</code></pre>
+<p><em>This was how I interpreted the above matrices, once again please ignore if you would like to.</em></p>
+<p><em>Euclidean distances:</em></p>
+<p><em>From arranging the correlations by ascencing and descending, we see that the lowest correlation (highest distance of 7.3737) occurs between the Egyptian Goose and the Black-Bellied Whistling Duck. The highest correlation (lowest distance of 0.0617) occurs between the American Widgeon and Cinnamon Teal. </em></p>
+<p><em>Gower distances:</em></p>
+<p><em>From arranging the gower distances, which means that we are including the categorical variable genus, we see that the most strongly correlated are the Eurasian Widgeon and the Gadwall x Northern Shoveler hybrid. These two species are therefore within the same genus, are observed at similar rates between the two years, and have similar numbers of agreements and disagreements</em></p>
+<p>#4. Data Visualization</p>
+<p><strong>Plot 1: COrrelation Heatmap</strong></p>
+<pre class="r"><code>library(ggplot2)
+
+
+correlation &lt;- data_clean %&gt;% select_if(is.numeric) %&gt;% cor(use = &quot;pair&quot;)
+correlation %&gt;% as.data.frame %&gt;% rownames_to_column(&quot;var1&quot;) %&gt;% 
+    pivot_longer(-1, &quot;var2&quot;, values_to = &quot;correlation&quot;) %&gt;% ggplot(aes(var1, 
+    var2, fill = correlation)) + geom_tile() + theme(axis.text.x = element_text(angle = 45, 
+    hjust = 1)) + labs(title = &quot;Correlation Heatmap&quot;) + theme(axis.title.x = element_blank()) + 
+    theme(axis.title.y = element_blank())</code></pre>
+<p><img src="/project/project1_files/figure-html/Correlation%20Heatmap-1.png" width="672" style="display: block; margin: auto;" />
+In this plot, we see a strong correlation between the rate of observation in 2016/2017 and the rate of observation in 2018/2019. This makes sense: bird species that are frequently observed in one time period will probably be frequently observed in the following time period. Throughout the heatmap, we see that values from the same year are more highly correlated than values from different years. This also makes sense, as we would expect to be able to predict the values better by other values from the same year than by values from a different year.</p>
+<p><strong>Plot 2: Scatterplot</strong></p>
+<pre class="r"><code>library(ggplot2)
+ggplot(data_clean, aes(x = rate16_17, y = rate18_19, color = genus)) + 
+    geom_point() + scale_x_log10() + scale_y_log10() + geom_segment(aes(x = 0, 
+    y = 0, xend = 0.1, yend = 0.1), color = &quot;black&quot;) + labs(title = &quot;Rate of Observation for Each Species Between Periods&quot;, 
+    x = &quot;Log Transformed Observation Rate 2016-2017&quot;, y = &quot;Log Transformed Observation Rate 2018-2019&quot;) + 
+    theme_bw()</code></pre>
+<p><img src="/project/project1_files/figure-html/Scatterplot-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>From this scatterplot, we can easily compmare the rates of observation for each species between the two time periods. The black line in the middle of the graph indicates the line that points would fall on if they were observed at the same rate in each time period. There is a lot of spread around this line for species that were observed at low rates, and a tighter fit to this line for species that were observed at higher rates. This shows that species that were observed at low rates tended to be observed more in one time period or the other, which spcies that were observed at high rates tended to be observed about the same in both time periods. Additionally, since the color of the dots corresponds to the genus, we are able to see that there is a fairly even distribution in which genera were observed the most or the least. There is no obvious cluster of secies all of the same genus that show the same rate of observation.</p>
+<pre class="r"><code># Box plot of average ID agreements and disagreements for
+# each year
+data_long %&gt;% filter(Variable != &quot;Rate&quot;) %&gt;% ggplot() + geom_boxplot(mapping = aes(x = Variable, 
+    y = Value, color = Year)) + scale_y_continuous(breaks = seq(0, 
+    8, 0.5)) + theme_bw() + labs(title = &quot;Average Agreements and Disagreements Across Periods&quot;, 
+    x = &quot;Type of Added ID&quot;, y = &quot;Number Average Additional IDs&quot;) + 
+    scale_fill_brewer(palette = &quot;Set3&quot;)</code></pre>
+<p><img src="/project/project1_files/figure-html/BarChart-1.png" width="672" style="display: block; margin: auto;" />
+We can see from this plot that there were a greater amount of average IDs added that agreed with the original observation in 2016/2017 than in 2018/2019. As I only queried research grade observations, this trend makes me wonder if iNaturalist relaxed the standards needed for an observation to be considered research grade after 2017. Additionally, we see that in 2018/2019 one species had an average number of ID agreements around 7. This species must often be sighted in an area with lots of iNat users. Additionally, we see that the majority of ID disagreements are around zero. This is to be expected, as I queried observations that were research grade and therefore have lots of agreements compared to few disagreements.</p>
+<p>#5. PAM Clustering</p>
+<p>I chose to do PAM clustering because I want to incorporate the categorical variable of genus into my clusters. Additionally, PAM is more robust and more commonly used in practice than k means.</p>
+<pre class="r"><code>library(cluster)
+library(GGally)
+## 1. Convert Categorical Variables to Factors
+cluster_data &lt;- data_clean %&gt;% mutate_if(is.character, as.factor) %&gt;% 
+    column_to_rownames(&quot;common_name&quot;) %&gt;% na.omit
+
+# 2. Find out how many clusters to use with silhouette width
+gower1 &lt;- cluster_data %&gt;% daisy(metric = &quot;gower&quot;)
+
+pam_dat &lt;- gower1
+sil_width &lt;- vector()
+for (i in 2:10) {
+    pam_fit &lt;- pam(pam_dat, k = i)
+    sil_width[i] &lt;- pam_fit$silinfo$avg.width
+}
+ggplot() + geom_line(aes(x = 1:10, y = sil_width)) + scale_x_continuous(name = &quot;k&quot;, 
+    breaks = 1:10)</code></pre>
+<p><img src="/project/project1_files/figure-html/K-Means%20Clustering-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># 3. Run PAM
+pam2 &lt;- pam(gower1, k = 2, diss = TRUE)
+pam2</code></pre>
+<pre><code>## Medoids:
+##      ID                     
+## [1,] &quot;28&quot; &quot;Mallard&quot;         
+## [2,] &quot;13&quot; &quot;Common Merganser&quot;
+## Clustering vector:
+##            American Green-winged Teal                       American Wigeon 
+##                                     1                                     1 
+##          Black-bellied Whistling-Duck                           Black Brant 
+##                                     1                                     2 
+##                      Blue-winged Teal                                 Brant 
+##                                     1                                     1 
+##                            Bufflehead                        Cackling Goose 
+##                                     1                                     1 
+##                          Canada Goose                            Canvasback 
+##                                     2                                     1 
+##                         Cinnamon Teal                      Common Goldeneye 
+##                                     1                                     2 
+##                      Common Merganser                Domestic Greylag Goose 
+##                                     2                                     2 
+##                      Domestic Mallard                 Domestic Muscovy Duck 
+##                                     1                                     1 
+##                   Domestic Swan Goose                        Egyptian Goose 
+##                                     1                                     2 
+##                Fulvous Whistling-Duck                               Gadwall 
+##                                     1                                     1 
+##                         Greater Scaup           Greater White-fronted Goose 
+##                                     2                                     1 
+##                     Green-winged Teal                  Greylag × Swan Goose 
+##                                     1                                     1 
+##                         Greylag Goose                      Hooded Merganser 
+##                                     1                                     2 
+##                          Lesser Scaup                               Mallard 
+##                                     1                                     1 
+##                Mallard × Mexican Duck                Mallard × Muscovy Duck 
+##                                     1                                     2 
+##        Mallards, Pintails, and Allies                          Mexican Duck 
+##                                     1                                     1 
+##                          Mottled Duck                          Muscovy Duck 
+##                                     1                                     1 
+##                             Mute Swan Northern Black-bellied Whistling-Duck 
+##                                     2                                     1 
+##                      Northern Pintail                     Northern Shoveler 
+##                                     1                                     2 
+##                Red-breasted Merganser                               Redhead 
+##                                     2                                     1 
+##                      Ring-necked Duck                            Ruddy Duck 
+##                                     1                                     1 
+##                  Shovelers and Allies                            Snow Goose 
+##                                     2                                     1 
+##                           Surf Scoter                            Swan Goose 
+##                                     2                                     1 
+##                             Wood Duck 
+##                                     2 
+## Objective function:
+##     build      swap 
+## 0.1786486 0.1786486 
+## 
+## Available components:
+## [1] &quot;medoids&quot;    &quot;id.med&quot;     &quot;clustering&quot; &quot;objective&quot;  &quot;isolation&quot; 
+## [6] &quot;clusinfo&quot;   &quot;silinfo&quot;    &quot;diss&quot;       &quot;call&quot;</code></pre>
+<pre class="r"><code># 4. Visualize pamclust&lt;-data_clean %&gt;%
+# mutate(cluster=as.factor(pam2$Clustering)) Was not able to
+# figure out this part, so unable to visualize it in ggplot2
+
+# Put into a graph in GGally to interpret GGally will not run
+# when genus is included, so I removed it to be able to
+# visualize the data
+cluster_data %&gt;% select(-genus) %&gt;% ggpairs(cluster_data, columns = 1:8, 
+    aes(color = as.factor(pam2$clustering)))</code></pre>
+<p><img src="/project/project1_files/figure-html/K-Means%20Clustering-2.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># 4. Check goodness-of-fit
+(plot(pam2, which = 2))</code></pre>
+<p><img src="/project/project1_files/figure-html/K-Means%20Clustering-3.png" width="672" style="display: block; margin: auto;" /></p>
+<pre><code>## NULL</code></pre>
+<pre class="r"><code># .19 is our average silhouette width, which means that we
+# have not in fact found a structure</code></pre>
+<p>From our plot of silhouette width for various sizes of clusters, we see that there are two peaks in the silhouette width: one at 2 and one at 10. I am choosing to do 2 clusters because we were told that most PAM clustering is done on 2-5 clusters. Additionally, I have 10 variables, so it would not make sense to cluster based on every single variable. From our PAM analysis, we see that the medoid for the first cluster is the Mallard, and the medoid for the second cluster is the Common Merganser. When evaluating our PAM clustering with goodness-of-fit, we see that the average silhouette width is 0.19, which means that no structure in fact was found. This could be due to the fact that few variables from my data strongly correlate with each other: for example, the average number of disagreements is not likely to explain rate of observation, number of agreements, or anything besides maybe the cumulative number of disagreements.</p>
+<p>Although this clustering analysis very poorly explains the data, we can still pick out certain trends from the GGally plot. The strongest correlation is between the rate that each species was observed in 2016/2017 and the rate that each species was observed in 2018/2019. This makes sense, as if you see high rates of observation in one time period you would expect to also see high rates of observation in the following time period. There is also a high correlation between combined agreements and agreements in 2016/2017 and 2018/2019. Again, this makes sense because species with higher observations in each year will have higher observations in both years.</p>
+<p>```</p>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

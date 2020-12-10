@@ -1,0 +1,26 @@
+---
+title: "Projects"
+output: html_document
+hidedate: true
+hiderelated: true
+hidediscus: true
+---
+
+Check out some of my coding projects below:
+
+
+<i class="fa fa-signal"></i> &nbsp; [Wrangling & Exploratory Data Analysis](/project/project1/)
+
+<i class="fa fa-line-chart"></i> &nbsp; [Modeling, Inference, Prediction](/project/project2/)
+
+Or check out some previous class projects here: 
+
+
+<i class="fa fa-tasks"></i> &nbsp; [Principles of Animal Behavior Final Project](/project/AnimalBehavProj/)
+
+<i class="fa fa-tasks"></i> &nbsp; [Central Texas Salamanders Review](/project/Central-Texas-Spring-Salamanders/)
+
+<!--
+<i class="fa fa-pie-chart"></i> 
+<i class="fa fa-tasks"></i> 
+-->

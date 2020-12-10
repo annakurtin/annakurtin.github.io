@@ -1,0 +1,149 @@
+---
+title: Coding Demonstration
+author: ''
+date: '2020-12-10'
+slug: coding-demonstration
+categories: []
+tags: []
+description: ''
+---
+
+```{R Setup Two, include = FALSE}
+library(reticulate)
+```
+
+Ah, coding. Love it or hate it, it's an essential tool in many biologists' repertoire. Going into college, I had no idea that there would be so much coding and computer work involved. In fact, if you had shown freshman year me one of my latest projects, I would have run in the other direction!
+
+![](/post/2020-12-10-coding-demonstration_files/Baby Corn Snake.jpg)
+
+*This pretty sums up how I got into coding. Credit: unknown*
+
+Throughout high school, I was infamous among my family and friends for being hopelessly lost when working with computers. When a notification popped up on the family desktop that I couldn't solve with the click of a button, I immediately ran to others for help. My reputation didn't upset me, and I found it more humorous than anything else. Fast forward to registration for my spring semester freshman year classes, when I found myself staring at a list of courses to choose from that would complete a requirement for my major. One of these was an introduction to computer science for non-CS majors, and I figured why not? I'd heard that coding skills were useful to have in science, and it would fill a requirement anyways. I wondered if my prof would be able to transform my technological flounderings into useful skills. 
+
+Looking back on my college career, I can clearly see that my Intro CS class was easily one of the most valuable classes I could have taken. Although I struggled at first, I slowly learned how to speak the language of computers. I learned about the different data types and how to manipulate and work with each.
+
+I learned how to loop through things:
+
+```{python For and While Loops}
+# For loops
+string="Here's an example of what I can do."
+# separate the string into a list of strings
+new_list=string.split(sep=" ")
+# loop through this list with a for loop
+for word in new_list:
+    print(word)
+
+    
+# While loops and if/else statements
+# Create a list
+my_stuff=[1,2,4,6,8,10,12]
+# Establish a counter
+i=0
+# Loop through, adding one to the counter each time
+while i < len(my_stuff): # This means while i < 4
+    print(my_stuff[i]*2)
+    i+=1 
+```
+
+And I learned about if/else statements:
+
+```{python If Else}
+# create a list
+data=[86.5,60.4,88.3,89.7,90.0,78.1]
+
+students_a=0
+students_b=0
+students_c=0
+students_f=0
+
+for grade in data:
+  student=data.index(grade)+1
+  if grade < 70:
+    print("Student", student, "recieved a grade of", grade, "and is failing.")
+  else:
+      if grade <80:
+        print("Student", student, "recieved a grade of", grade, "and is passing with a C.")
+      elif grade < 90:
+        print("Student",student, "recieved a grade of", grade, "and is passing with a B.")
+      else: 
+        print("Student", student, "recieved a grade of", grade, "and is passing with an A!")
+```
+
+Learning what to code was valuable; more importantly than this, however, I learned **how** to code. There is a certain mindset that is necessary when working with computers, and once I began to "think like a programmer" (in the words of my professor), the rate at which I learned increased greatly. This mindset can be summed up simply: oftentimes you just have to test things out. Just as if you were in your own while loop, you have to write code, run it to see the result, think about why you got the error or result you did, troubleshoot, and then start the process over and over again until a solution has been achieved. 
+
+This valuable lesson would assist me later, when I ventured into learning R and began to gain skills that I have already began to apply in my biological work. I enrolled in the biostats course required by my major my sophomore year, and since I had a bit of a rocky relationship with math, I was expecting a boring, confusing class that I would struggle through and then forget about within a year. I couldn't have been more wrong, however, and from the first day I was enthralled. This was numbers not just for numbers' sake, but which actually meant something! Not only that, but we covered data collection, types of data, ethics, visualization, and more. One of the main components of the course included learning to create figures and run statistical tests in R, and I was abruptly faced with my next coding challenge. R is a whole different beast than the python I had previously worked with, but I quickly adjusted to this new language and learned a lot (admittedly forgetting a decent amount of python in the process).
+
+My biostats class interested me enough to prompt me to enroll in computational biology my senior year. Me, the technologically-challenged girl who had never been interested in code, would now spend an entire semester diving into the nuances of data exploration, visualization, and hypothesis testing, all in computer code! Life can be funny like that, huh? 
+
+During this class, my experience coding in python once more proved to be helpful, as after learning how to visualize and analyze data in R, we learned how to do the same in python. To my surprise, I also learned that these two languages can work together! For example, here is some basic data manipulation in R: 
+
+```{R Uploading Data}
+iris <- iris
+# Working with data in R
+#Descriptive stats for sepal length
+mean(iris$Sepal.Length)
+min(iris$Sepal.Length)
+max(iris$Sepal.Length)
+sd(iris$Sepal.Length)
+#Descriptive stats for sepal width
+mean(iris$Sepal.Width)
+min(iris$Sepal.Width)
+max(iris$Sepal.Width)
+sd(iris$Sepal.Width)
+```
+
+And here is the same thing, done in python using the data from the R code chunk!
+
+```{python Data Demo}
+import numpy as np
+# Pass the iris dataframe to python
+iris=r.iris
+#Descriptive stats for sepal length"
+np.mean(iris["Sepal.Length"])
+np.min(iris["Sepal.Length"])
+np.max(iris["Sepal.Length"])
+np.std(iris["Sepal.Length"])
+#Descriptive statistics for sepal width
+np.mean(iris["Sepal.Width"])
+np.min(iris["Sepal.Width"])
+np.max(iris["Sepal.Width"])
+np.std(iris["Sepal.Width"])
+```
+
+Just like when I cobble a sentence together made of both English and Spanish in an attempt to get my point across, I realized that these two computer languages could be used interchangeably. 
+
+
+We also went into greater depth in python, learning the basics of regular expressions: 
+
+```{python Regular Expressions}
+import re
+string="There are currently 12,000 quokkas living on Rottnest Island."
+
+# match groups
+match=re.match(r"There are currently (.+) living on (.+)",string)
+match.group(0) #the full match
+```
+```{python Match Group One}
+#What are we talking about?
+match.group(1) 
+```
+```{python Match Group Two}
+# Where are they?
+match.group(2)
+```
+```{python Regex Finding Letters}
+# Find instances of e's followed by either a space or another letter
+re.findall(r"e[\s\w]",string)
+```
+
+```{python Regular Expressions Cont}
+# Find all the digits in the sentence
+re.findall(r"\d",string)
+```
+
+```{python Regular Expressions Cont Cont}
+# substitutions
+re.sub(r"quokkas","cute little marsupials",string)
+```
+
+As you can see, my journey with python has been a long, unexpected one. I came into it with quite a bit of trepidation, but I will be leaving college confident of my skills and aware of how they can be of use for my future efforts in research. If not for my professors who guided me through Intro to CS, Biostats and Computational Biology, I would probably be the person who embraced the "useless with computers" label. Granted, I never would have known the incredible frustration of wrangling stubborn code, but I also would never have experienced the satisfaction of seeing a problem, realizing how to solve it, and having the capabilities to carry out the solution. For now, I'll continue learning and see where coding takes me in the future!

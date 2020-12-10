@@ -1,0 +1,8 @@
+---
+title: "Principles of Animal Behavior Final Project"
+author: "Anna Kurtin"
+date: "12/10/2020"
+output: html_document
+---
+
+<iframe src="/Kurtin_AnimalBehav_FinalProjectPaper.pdf" width="100%" height="800" border="0"></iframe>

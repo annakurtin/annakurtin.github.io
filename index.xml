@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Anna Kurtin</title>
+    <link>/</link>
+    <description>Recent content on Anna Kurtin</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-US</language>
+    <lastBuildDate>Thu, 10 Dec 2020 00:00:00 +0000</lastBuildDate><atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Coding Demonstration</title>
+      <link>/post/2020/12/10/coding-demonstration/</link>
+      <pubDate>Thu, 10 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/10/coding-demonstration/</guid>
+      <description>Ah, coding. Love it or hate it, it’s an essential tool in many biologists’ repertoire. Going into college, I had no idea that there would be so much coding and computer work involved. In fact, if you had shown freshman year me one of my latest projects, I would have run in the other direction!
+This pretty sums up how I got into coding. Credit: unknown
+Throughout high school, I was infamous among my family and friends for being hopelessly lost when working with computers.</description>
+    </item>
+    
+    <item>
+      <title>Kinkajou Travels (Costa Rica Internship Blog)</title>
+      <link>/post/2020/12/09/kinkajou-travels-costa-rica-internship-blog/</link>
+      <pubDate>Wed, 09 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/09/kinkajou-travels-costa-rica-internship-blog/</guid>
+      <description>Add in a picture from costa rica, maybe from the mountain top or the view of kstr from above
+In the fall semester of my junior year, I took part in an internship abroad with Kids Saving the Rainforest, a wildlife rescue, sanctuary, and conservation center in Quepos, Costa Rica. This fantastic study abroad experience taught me more than I could have imagined about conservation, animal care, Costa Rican history and culture, research, ecotourism and more.</description>
+    </item>
+    
+    <item>
+      <title>Coding Demonstration</title>
+      <link>/post/2020/12/08/coding-demonstration/</link>
+      <pubDate>Tue, 08 Dec 2020 00:00:00 +0000</pubDate>
+      
+      <guid>/post/2020/12/08/coding-demonstration/</guid>
+      <description>Ah, coding. Love it or hate it, it’s an essential tool in many biologists’ repertoire. Going into college, I had no idea that there would be so much coding and computer work involved. In fact, if you had shown freshman year me one of my latest projects, I would have run in the other direction!
+This pretty sums up how I got into coding. Credit: unknown
+Throughout high school, I was infamous among my family and friends for being hopelessly lost when working with computers.</description>
+    </item>
+    
+    <item>
+      <title>Central Texas Spring Salamanders</title>
+      <link>/project/central-texas-spring-salamanders/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/central-texas-spring-salamanders/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Comp Bio Project 2 Kurtin</title>
+      <link>/project/project2/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project2/</guid>
+      <description>IntroductionThe data that I am using for this project comes from the Primate Molecular Ecology and Evolution Lab, with permission for use from Dr. Anthony Di Fiore. This data documents information about monkeys that were tranquilized at the Tiputini Biodiversity Station to take biological samples and place a tracking collar on the animal. There are 21 observations, meaning that there were a total of 21 monkeys darted. The columns included in this dataset are as follows:</description>
+    </item>
+    
+    <item>
+      <title>Kurtin Comp Bio Project 1: Exploratory Data Analysis</title>
+      <link>/project/project1/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/project1/</guid>
+      <description>Mexican Waterfowl Count Data Across Two Two-Year Periods from iNaturalistFor my project, I am using data exported from iNaturalist, one of the largest platforms for citizen science. This data is interesting to me becuase citizen science platforms such as iNaturalist have recently been recognized for their valuable potential for science. Mobilizing every day people to collect data on the natural world has provided scientists with an unprecedented ability to monitor biodiversity on different spatial scales.</description>
+    </item>
+    
+    <item>
+      <title>Principles of Animal Behavior Final Project</title>
+      <link>/project/animalbehavproj/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/project/animalbehavproj/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Projects</title>
+      <link>/projects/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/projects/</guid>
+      <description>Check out some of my coding projects below:
+ Wrangling &amp;amp; Exploratory Data Analysis
+ Modeling, Inference, Prediction
+Or check out some previous class projects here:
+ Principles of Animal Behavior Final Project
+ Central Texas Salamanders Review
+  --</description>
+    </item>
+    
+    <item>
+      <title>Resume</title>
+      <link>/resume/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/resume/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Anna Kurtin" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Coding Demonstration</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/post/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/post/2020/12/10/coding-demonstration/">Coding Demonstration</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         December 10, 2020 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<p>Ah, coding. Love it or hate it, it’s an essential tool in many biologists’ repertoire. Going into college, I had no idea that there would be so much coding and computer work involved. In fact, if you had shown freshman year me one of my latest projects, I would have run in the other direction!</p>
+<p><img src="/post/2020-12-10-coding-demonstration_files/Baby%20Corn%20Snake.jpg" /></p>
+<p><em>This pretty sums up how I got into coding. Credit: unknown</em></p>
+<p>Throughout high school, I was infamous among my family and friends for being hopelessly lost when working with computers. When a notification popped up on the family desktop that I couldn’t solve with the click of a button, I immediately ran to others for help. My reputation didn’t upset me, and I found it more humorous than anything else. Fast forward to registration for my spring semester freshman year classes, when I found myself staring at a list of courses to choose from that would complete a requirement for my major. One of these was an introduction to computer science for non-CS majors, and I figured why not? I’d heard that coding skills were useful to have in science, and it would fill a requirement anyways. I wondered if my prof would be able to transform my technological flounderings into useful skills.</p>
+<p>Looking back on my college career, I can clearly see that my Intro CS class was easily one of the most valuable classes I could have taken. Although I struggled at first, I slowly learned how to speak the language of computers. I learned about the different data types and how to manipulate and work with each.</p>
+<p>I learned how to loop through things:</p>
+<pre class="python"><code># For loops
+string=&quot;Here&#39;s an example of what I can do.&quot;
+# separate the string into a list of strings
+new_list=string.split(sep=&quot; &quot;)
+# loop through this list with a for loop
+for word in new_list:
+    print(word)
+
+    
+# While loops and if/else statements
+# Create a list</code></pre>
+<pre><code>## Here&#39;s
+## an
+## example
+## of
+## what
+## I
+## can
+## do.</code></pre>
+<pre class="python"><code>my_stuff=[1,2,4,6,8,10,12]
+# Establish a counter
+i=0
+# Loop through, adding one to the counter each time
+while i &lt; len(my_stuff): # This means while i &lt; 4
+    print(my_stuff[i]*2)
+    i+=1 </code></pre>
+<pre><code>## 2
+## 4
+## 8
+## 12
+## 16
+## 20
+## 24</code></pre>
+<p>And I learned about if/else statements:</p>
+<pre class="python"><code># create a list
+data=[86.5,60.4,88.3,89.7,90.0,78.1]
+
+students_a=0
+students_b=0
+students_c=0
+students_f=0
+
+for grade in data:
+  student=data.index(grade)+1
+  if grade &lt; 70:
+    print(&quot;Student&quot;, student, &quot;recieved a grade of&quot;, grade, &quot;and is failing.&quot;)
+  else:
+      if grade &lt;80:
+        print(&quot;Student&quot;, student, &quot;recieved a grade of&quot;, grade, &quot;and is passing with a C.&quot;)
+      elif grade &lt; 90:
+        print(&quot;Student&quot;,student, &quot;recieved a grade of&quot;, grade, &quot;and is passing with a B.&quot;)
+      else: 
+        print(&quot;Student&quot;, student, &quot;recieved a grade of&quot;, grade, &quot;and is passing with an A!&quot;)</code></pre>
+<pre><code>## Student 1 recieved a grade of 86.5 and is passing with a B.
+## Student 2 recieved a grade of 60.4 and is failing.
+## Student 3 recieved a grade of 88.3 and is passing with a B.
+## Student 4 recieved a grade of 89.7 and is passing with a B.
+## Student 5 recieved a grade of 90.0 and is passing with an A!
+## Student 6 recieved a grade of 78.1 and is passing with a C.</code></pre>
+<p>Learning what to code was valuable; more importantly than this, however, I learned <strong>how</strong> to code. There is a certain mindset that is necessary when working with computers, and once I began to “think like a programmer” (in the words of my professor), the rate at which I learned increased greatly. This mindset can be summed up simply: oftentimes you just have to test things out. Just as if you were in your own while loop, you have to write code, run it to see the result, think about why you got the error or result you did, troubleshoot, and then start the process over and over again until a solution has been achieved.</p>
+<p>This valuable lesson would assist me later, when I ventured into learning R and began to gain skills that I have already began to apply in my biological work. I enrolled in the biostats course required by my major my sophomore year, and since I had a bit of a rocky relationship with math, I was expecting a boring, confusing class that I would struggle through and then forget about within a year. I couldn’t have been more wrong, however, and from the first day I was enthralled. This was numbers not just for numbers’ sake, but which actually meant something! Not only that, but we covered data collection, types of data, ethics, visualization, and more. One of the main components of the course included learning to create figures and run statistical tests in R, and I was abruptly faced with my next coding challenge. R is a whole different beast than the python I had previously worked with, but I quickly adjusted to this new language and learned a lot (admittedly forgetting a decent amount of python in the process).</p>
+<p>My biostats class interested me enough to prompt me to enroll in computational biology my senior year. Me, the technologically-challenged girl who had never been interested in code, would now spend an entire semester diving into the nuances of data exploration, visualization, and hypothesis testing, all in computer code! Life can be funny like that, huh?</p>
+<p>During this class, my experience coding in python once more proved to be helpful, as after learning how to visualize and analyze data in R, we learned how to do the same in python. To my surprise, I also learned that these two languages can work together! For example, here is some basic data manipulation in R:</p>
+<pre class="r"><code>iris &lt;- iris
+# Working with data in R
+#Descriptive stats for sepal length
+mean(iris$Sepal.Length)</code></pre>
+<pre><code>## [1] 5.843333</code></pre>
+<pre class="r"><code>min(iris$Sepal.Length)</code></pre>
+<pre><code>## [1] 4.3</code></pre>
+<pre class="r"><code>max(iris$Sepal.Length)</code></pre>
+<pre><code>## [1] 7.9</code></pre>
+<pre class="r"><code>sd(iris$Sepal.Length)</code></pre>
+<pre><code>## [1] 0.8280661</code></pre>
+<pre class="r"><code>#Descriptive stats for sepal width
+mean(iris$Sepal.Width)</code></pre>
+<pre><code>## [1] 3.057333</code></pre>
+<pre class="r"><code>min(iris$Sepal.Width)</code></pre>
+<pre><code>## [1] 2</code></pre>
+<pre class="r"><code>max(iris$Sepal.Width)</code></pre>
+<pre><code>## [1] 4.4</code></pre>
+<pre class="r"><code>sd(iris$Sepal.Width)</code></pre>
+<pre><code>## [1] 0.4358663</code></pre>
+<p>And here is the same thing, done in python using the data from the R code chunk!</p>
+<pre class="python"><code>import numpy as np
+# Pass the iris dataframe to python
+iris=r.iris
+#Descriptive stats for sepal length&quot;
+np.mean(iris[&quot;Sepal.Length&quot;])</code></pre>
+<pre><code>## 5.843333333333334</code></pre>
+<pre class="python"><code>np.min(iris[&quot;Sepal.Length&quot;])</code></pre>
+<pre><code>## 4.3</code></pre>
+<pre class="python"><code>np.max(iris[&quot;Sepal.Length&quot;])</code></pre>
+<pre><code>## 7.9</code></pre>
+<pre class="python"><code>np.std(iris[&quot;Sepal.Length&quot;])
+#Descriptive statistics for sepal width</code></pre>
+<pre><code>## 0.8253012917851409</code></pre>
+<pre class="python"><code>np.mean(iris[&quot;Sepal.Width&quot;])</code></pre>
+<pre><code>## 3.0573333333333337</code></pre>
+<pre class="python"><code>np.min(iris[&quot;Sepal.Width&quot;])</code></pre>
+<pre><code>## 2.0</code></pre>
+<pre class="python"><code>np.max(iris[&quot;Sepal.Width&quot;])</code></pre>
+<pre><code>## 4.4</code></pre>
+<pre class="python"><code>np.std(iris[&quot;Sepal.Width&quot;])</code></pre>
+<pre><code>## 0.4344109677354946</code></pre>
+<p>Just like when I cobble a sentence together made of both English and Spanish in an attempt to get my point across, I realized that these two computer languages could be used interchangeably.</p>
+<p>We also went into greater depth in python, learning the basics of regular expressions:</p>
+<pre class="python"><code>import re
+string=&quot;There are currently 12,000 quokkas living on Rottnest Island.&quot;
+
+# match groups
+match=re.match(r&quot;There are currently (.+) living on (.+)&quot;,string)
+match.group(0) #the full match</code></pre>
+<pre><code>## &#39;There are currently 12,000 quokkas living on Rottnest Island.&#39;</code></pre>
+<pre class="python"><code>#What are we talking about?
+match.group(1) </code></pre>
+<pre><code>## &#39;12,000 quokkas&#39;</code></pre>
+<pre class="python"><code># Where are they?
+match.group(2)</code></pre>
+<pre><code>## &#39;Rottnest Island.&#39;</code></pre>
+<pre class="python"><code># Find instances of e&#39;s followed by either a space or another letter
+re.findall(r&quot;e[\s\w]&quot;,string)</code></pre>
+<pre><code>## [&#39;er&#39;, &#39;e &#39;, &#39;e &#39;, &#39;en&#39;, &#39;es&#39;]</code></pre>
+<pre class="python"><code># Find all the digits in the sentence
+re.findall(r&quot;\d&quot;,string)</code></pre>
+<pre><code>## [&#39;1&#39;, &#39;2&#39;, &#39;0&#39;, &#39;0&#39;, &#39;0&#39;]</code></pre>
+<pre class="python"><code># substitutions
+re.sub(r&quot;quokkas&quot;,&quot;cute little marsupials&quot;,string)</code></pre>
+<pre><code>## &#39;There are currently 12,000 cute little marsupials living on Rottnest Island.&#39;</code></pre>
+<p>As you can see, my journey with python has been a long, unexpected one. I came into it with quite a bit of trepidation, but I will be leaving college confident of my skills and aware of how they can be of use for my future efforts in research. If not for my professors who guided me through Intro to CS, Biostats and Computational Biology, I would probably be the person who embraced the “useless with computers” label. Granted, I never would have known the incredible frustration of wrangling stubborn code, but I also would never have experienced the satisfaction of seeing a problem, realizing how to solve it, and having the capabilities to carry out the solution. For now, I’ll continue learning and see where coding takes me in the future!</p>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>

@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Anna Kurtin" />
+    
+    <link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico">
+    <title>Comp Bio Project 2 Kurtin</title>
+    <meta name="generator" content="Hugo 0.79.0" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="/css/main.css" />
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:200,400,200bold,400old" />
+    
+    <!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+    
+  </head>
+
+  <body>
+    <div id="wrap">
+      
+      <nav class="navbar navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/"><i class="fa fa-home"></i></a>
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+      <ul class="nav navbar-nav navbar-right">
+      
+        
+        <li><a href="/post/">BLOG</a></li>
+        
+        <li><a href="/projects/">PROJECTS</a></li>
+        
+        <li><a href="/resume/">RESUME</a></li>
+        
+      
+      </ul>
+    </div>
+  </div>
+</nav>
+
+      <div class="container">
+        <div class="blog-post">
+          <h3>
+            <strong><a href="/project/project2/">Comp Bio Project 2 Kurtin</a></strong>
+          </h3>
+        </div>
+ 
+<div class="blog-title">
+          <h4>
+         January 1, 0001 
+            &nbsp;&nbsp;
+            
+          </h4>
+        </div>
+
+        <div class="panel panel-default">
+          <div class="panel-body">
+            <div class="blogpost">
+              
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The data that I am using for this project comes from the Primate Molecular Ecology and Evolution Lab, with permission for use from Dr. Anthony Di Fiore. This data documents information about monkeys that were tranquilized at the Tiputini Biodiversity Station to take biological samples and place a tracking collar on the animal. There are 21 observations, meaning that there were a total of 21 monkeys darted. The columns included in this dataset are as follows:</p>
+<p><strong>Genus:</strong> A categorical variable that correlates to the species, as there are no species of the same genus in this dataset. <em>Callicebus</em> refers to the genus of titi monkeys, <em>Pithecia</em> refers to saki monkeys, <em>Aotus</em> refers to owl monkeys, and <em>Lagothrix</em> refers to woolly monkeys.</p>
+<p><strong>Sex:</strong> A binary variable indicating the sex of the monkey, either male (0) or female (1)</p>
+<p><strong>Age Class:</strong> A categorical variable that indicates the age group that the monkey falls into, including <em>adult</em>, <em>subadult</em>, <em>juvenile</em>, and <em>subadult or adult</em>.</p>
+<p><strong>Dosage:</strong> A numeric variable indicating the initial dosage that the monkey was hit with in mg ketamine.</p>
+<p><strong>Hour Hit:</strong> A numeric variable indicating the hour of the day that the monkey was struck by the tranquilizer dart</p>
+<p><strong>Minutes to Fall:</strong> A numeric variable indicating the minutes it took for the tranquilizer to take effect and cause the monkey to fall out of the tree</p>
+<p><strong>Minutes to Release:</strong> A numeric variable indicating the minutes between when the monkey fell and when it was released back into the forest</p>
+<p><strong>Ectoparasites:</strong> A binary variable indicating whether or not the monkey had external parasites such as a botfly larvae</p>
+<div id="loading-packages-importing-and-cleaning-data" class="section level2">
+<h2>Loading Packages, Importing and Cleaning Data</h2>
+<pre class="r"><code>library(tidyverse)
+library(janitor)
+library(interactions)
+library(ggplot2)
+library(sandwich)
+library(lmtest)
+library(plotROC) 
+library(rstatix)
+library(glmnet)
+
+captures &lt;- read_csv(&quot;capture record.csv&quot;)
+captures &lt;- captures %&gt;% clean_names()
+captures &lt;- captures %&gt;% select(species,sex,age_class_when_captured,dosage_mg_ketamine,time_hit,time_fell,time_released,ectoparasites)
+captures &lt;- captures %&gt;% na.omit
+
+
+
+#Species column 
+## This tells the species that was darted. We only need to know the genus for this, as there are no species with overlapping genera
+captures &lt;- captures %&gt;% separate(species,into=c(&quot;genus&quot;,&quot;species&quot;))
+
+# Sex
+## Convert to binary, 1 for female and 0 for male
+captures &lt;- captures %&gt;% mutate(sex=ifelse(sex==&quot;Female&quot;,1,0))
+
+# Age class 
+## Ask Tony what the codes for the age class mean
+## AFD = adult female?
+## SF = subadult female?
+## AM = adule male?
+# If no response, change the codes to UNK
+
+captures &lt;- captures %&gt;% rename(age_class = age_class_when_captured)
+
+# Some of the age classes are in codes, so using the key from the database we&#39;re going to rename them to match with the format of the other entries 
+captures &lt;- captures %&gt;% 
+  mutate(age_class=ifelse(age_class==&quot;AFD/&quot;,&quot;Adult&quot;,age_class)) %&gt;% 
+  mutate(age_class=ifelse(age_class==&quot;BAM/&quot;,&quot;Adult&quot;,age_class)) %&gt;% 
+  mutate(age_class=ifelse(age_class==&quot;SF/&quot;,&quot;Subadult&quot;,age_class)) %&gt;% 
+  mutate(age_class=ifelse(age_class==&quot;AM/&quot;,&quot;Adult&quot;,age_class))
+
+
+# Dosage
+## In mg ketamine
+captures &lt;- captures %&gt;% rename(dosage = dosage_mg_ketamine)
+
+# Time hit
+## use separate() to get just the hour to stand in for time of day
+## Copy time hit over
+captures &lt;- captures %&gt;% mutate(time_hit2 = time_hit) %&gt;% separate(time_hit,into = c(&quot;hour_hit&quot;,&quot;minute_hit&quot;))
+
+
+# Calculate the time to fall
+## time_fell - time_hit creates a column of the difference in seconds, convert these into minutes and then convert into numeric
+captures &lt;- captures %&gt;% mutate(time_to_fall = time_fell-time_hit2) %&gt;% mutate(mins_to_fall =time_to_fall/60) %&gt;% mutate(mins_to_fall = as.numeric(mins_to_fall)) %&gt;%mutate(hour_hit = as.numeric(hour_hit))
+
+# Calculate time to be released
+captures &lt;- captures %&gt;% mutate(time_to_release = time_released-time_fell) %&gt;% mutate(mins_to_release =time_to_release/60) %&gt;% mutate(mins_to_release = as.numeric((mins_to_release)))
+
+
+# Ectoparasites 
+# First change the one wonky observation to a simple Yes
+captures[6, 9] = &quot;Yes&quot;
+## If no or none, change to no
+## If anything else, change to yes
+captures &lt;- captures %&gt;% mutate(ectoparasites=ifelse(ectoparasites==&quot;Yes&quot;,1,0))
+
+captures &lt;- captures %&gt;% select(genus,sex, age_class,dosage, hour_hit,time_hit =time_hit2,mins_to_fall,mins_to_release,ectoparasites)
+
+# Turn all numeric variables into numeric
+captures &lt;- captures %&gt;% mutate(dosage=as.numeric(dosage),hour_hit=as.numeric(hour_hit),mins_to_fall=as.numeric(mins_to_fall),mins_to_release=as.numeric(mins_to_release))
+
+summary(captures)</code></pre>
+<pre><code>## genus sex age_class dosage hour_hit
+## Length:21 Min.  :0.0000 Length:21 Min.  : 25.00 Min.  :
+6.00
+## Class :character 1st Qu.:0.0000 Class :character 1st
+Qu.: 45.00 1st Qu.: 9.00
+## Mode :character Median :0.0000 Mode :character Median :
+50.00 Median :11.00
+## Mean :0.4762 Mean : 75.48 Mean :11.71
+## 3rd Qu.:1.0000 3rd Qu.: 50.00 3rd Qu.:15.00
+## Max.  :1.0000 Max.  :200.00 Max.  :20.00
+## time_hit mins_to_fall mins_to_release ectoparasites
+## Length:21 Min.  : 1.00 Min.  : 69.0 Min.  :0.00000
+## Class1:hms 1st Qu.: 4.00 1st Qu.: 90.0 1st Qu.:0.00000
+## Class2:difftime Median : 8.00 Median :132.0 Median
+:0.00000
+## Mode :numeric Mean :19.38 Mean :146.8 Mean :0.09524
+## 3rd Qu.:21.00 3rd Qu.:161.0 3rd Qu.:0.00000
+## Max.  :92.00 Max.  :337.0 Max.  :1.00000</code></pre>
+<pre class="r"><code>head(captures)</code></pre>
+<pre><code>## # A tibble: 6 x 9
+## genus sex age_class dosage hour_hit time_hit
+mins_to_fall mins_to_release ectoparasites
+## &lt;chr&gt; &lt;dbl&gt; &lt;chr&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;time&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+## 1 Calliceb~ 1 Subadult or A~ 25 6 06:30 4 176 0
+## 2 Calliceb~ 0 Adult 50 13 13:50 21 159 0
+## 3 Pithecia 0 Adult 50 7 07:48 5 132 0
+## 4 Aotus 0 Juvenile 25 20 20:20 3 69 0
+## 5 Calliceb~ 0 Subadult 40 16 16:00 30 90 0
+## 6 Calliceb~ 0 Adult 25 9 09:26 5 89 0</code></pre>
+</div>
+</div>
+<div id="manova" class="section level1">
+<h1>MANOVA</h1>
+<p>For this test, I am including all numeric variables except for dosage, as dosage is controlled entirely by the experimenter and has no bearing on the genus.</p>
+<p><strong>Ho:</strong> For each genus, the mean hour hit, minutes to fall, and minutes to release are the same</p>
+<p><strong>Ha:</strong> One of these variables is different across genera</p>
+<pre class="r"><code># Create the model
+man_mod &lt;- manova(cbind(hour_hit,mins_to_fall,mins_to_release)~genus, data=captures)
+
+# View the results of the MANOVA
+summary(man_mod)</code></pre>
+<pre><code>##           Df Pillai approx F num Df den Df Pr(&gt;F)
+## genus      3 0.6459   1.5548      9     51 0.1545
+## Residuals 17</code></pre>
+<div id="interpreting-manova" class="section level2">
+<h2>Interpreting MANOVA</h2>
+<p>From our MANOVA model, we can see that the p value is 0.1545. This is greater than 0.05, so we fail to reject th enull hypothesis and conclude that the hour a monkey was hit, the minutes for the monkey to fall, and the minutes to be released do not vary significantly across genera.</p>
+<p>Because there is no significance, there is no need to perform univariate ANOVAs or t-tests.</p>
+<p>However, if there was significance, I would have then gone on to perform three univariate ANOVA tests, and if each of those was signfiicant, three t-tests in addition to the first MANOVA. This would end up being a total of 7 tests.</p>
+<pre class="r"><code># 7 tests conducted: hour hit to genus, minutes to fall to genus, minutes to release to genus, t tests for each, and MANOVA
+1-.95^7</code></pre>
+<pre><code>## [1] 0.3016627</code></pre>
+<p>With 7 tests, there is a 30.02% change that there is at least one type one error. The Bonferoni correction would have been necessary to ensure that there is not an oversize risk of committing a Type I error.</p>
+<pre class="r"><code># Bonferoni correction
+.05/7</code></pre>
+<pre><code>## [1] 0.007142857</code></pre>
+<p>With the Bonferoni correction applied, our new significance value (alpha) would have been 0.0071.</p>
+</div>
+<div id="manova-assumptions" class="section level2">
+<h2>MANOVA Assumptions</h2>
+<ol style="list-style-type: decimal">
+<li><p>Random samples, independent observations</p></li>
+<li><p>Mulitvariate normality of dependent variables</p></li>
+<li><p>Homogeneity of within-group covariance matrices</p></li>
+<li><p>Linear relationships among the dependent variables</p></li>
+<li><p>No extreme univariate or multivariate outliers</p></li>
+<li><p>No multicollinearity</p></li>
+</ol>
+<pre class="r"><code># MANOVA Assumptions
+group &lt;- captures$genus
+# This throws up an error because the genus Pithecia only has two observations 
+# Remove the genus &quot;Pithecia&quot; from group
+group &lt;- group[group !=&quot;Pithecia&quot;]
+DVs &lt;- captures %&gt;% select(hour_hit,mins_to_fall,mins_to_release)
+
+#Test multivariate normality for each group (null: assumption met)
+sapply(split(DVs,group), mshapiro_test)</code></pre>
+<pre><code>##           Aotus     Callicebus   Lagothrix   
+## statistic 0.761808  0.7023553    0.603158    
+## p.value   0.0262521 0.0002633796 0.0006903764</code></pre>
+<p>The samples are indeed random and independent observations. Each group has n=21, so the assumption of multivariate normality of dependent variables is not met. This is confirmed from the mshapiro test, where we saw that Aotus has a p value &gt; 0.05. Therefore, I conclude that the data doesn’t meet the assumptions for the MANOVA test.</p>
+</div>
+</div>
+<div id="randomization-test" class="section level1">
+<h1>Randomization Test</h1>
+<p>Using a randomization test, we will investigate if the mean time for females to fall after being hit with a tranquilizer dart significantly differs from the mean time for males to fall.</p>
+<p><strong>Ho:</strong> The mean time to fall is the same between males and females.</p>
+<p><strong>Ha:</strong> The mean time to fall is different between males and females.</p>
+<pre class="r"><code># Calculate the actual difference between the means that we observe
+observed_mean &lt;- mean(captures[captures$sex==1,]$mins_to_fall)-
+mean(captures[captures$sex==0,]$mins_to_fall)
+
+
+# Create an empty vector to fill with the new means 
+rand_dist&lt;-vector()
+for(i in 1:5000){
+new_data&lt;-data.frame(fall_time=sample(captures$mins_to_fall),sex=captures$sex)
+head(new_data)
+rand_dist[i]&lt;-mean(new_data[new_data$sex==1,]$fall_time)-
+mean(new_data[new_data$sex==0,]$fall_time)}
+
+# Create a plot of the null distribution with the values you calculated marked on it 
+{hist(rand_dist,main=&quot;Null Distribution&quot;,ylab=&quot;&quot;,xlab=&quot;Distance Between Means for M and F&quot;);abline(v=c(-12.636,12.636),col=&quot;red&quot;)}</code></pre>
+<p><img src="/project/project2_files/figure-html/Randomization%20Test-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Calculate the p-value
+mean(rand_dist&gt; 12.636 | rand_dist &lt; -12.636)</code></pre>
+<pre><code>## [1] 0.3296</code></pre>
+<div id="interpreting-randomization-test" class="section level2">
+<h2>Interpreting Randomization Test</h2>
+<p>After running a randomization test, we see that the p-value is 0.348, (p&gt;0.05). This means that we fail to reject the null hypothesis, concluding that the observed difference in the time that it took for females and males to fall after recieving a tranquilizing dart was not significantly different from the null distribution.</p>
+<p>However, we have to take into account that there are other factors at play in the time it takes monkeys to fall after being hit with a dart. The dosage of tranquilizer contained in the dart, age class of the monkey, and time of day all may have effects on the time it takes the ketamine to take effect.</p>
+</div>
+</div>
+<div id="linear-regression-model" class="section level1">
+<h1>Linear Regression Model</h1>
+<p>To investigate these other variables, we’re going to do a linear regression predicting time to fall from initial dosage in mg ketamine and time of day. I expect these variables to influence the time it took for the tranquilizer to take effect becuase a higher dosage will lead to a shorter time to fall. Additionally, the time of day might influence the time for the tranquilizer to take effect because howler monkeys feed in bouts then rest, so if they are shot after a feeding bout (i.e. in the morning or in the afternoon) it may take longer for the tranquilizer to take effect since the monkey has a full stomach.</p>
+<pre class="r"><code># Mean-center any numeric variables
+captures_extra &lt;- captures %&gt;% mutate(dosage_c=dosage-mean(dosage), hour_hit_c=hour_hit-mean(hour_hit))
+
+# Model predicting response from at least two numeric variables and their interaction
+## Predict minutes to fall from dosage and hour hit
+lin_mod &lt;- lm(formula=mins_to_fall~dosage_c*hour_hit_c, data = captures_extra)
+summary(lin_mod)</code></pre>
+<pre><code>##
+## Call:
+## lm(formula = mins_to_fall ~ dosage_c * hour_hit_c, data
+= captures_extra)
+##
+## Residuals:
+## Min 1Q Median 3Q Max
+## -24.514 -12.210 -5.761 1.114 77.243
+##
+## Coefficients:
+## Estimate Std. Error t value Pr(&gt;|t|)
+## (Intercept) 20.09153 5.27461 3.809 0.0014 **
+## dosage_c 0.15382 0.08894 1.729 0.1018
+## hour_hit_c 2.46341 1.72758 1.426 0.1720
+## dosage_c:hour_hit_c 0.06428 0.03257 1.974 0.0649 .
+## ---
+## Signif. codes: 0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1
+&#39; &#39; 1
+##
+## Residual standard error: 24.11 on 17 degrees of freedom
+## Multiple R-squared: 0.2854, Adjusted R-squared: 0.1593
+## F-statistic: 2.264 on 3 and 17 DF, p-value: 0.118</code></pre>
+<div id="interpreting-linear-regression-model" class="section level2">
+<h2>Interpreting Linear Regression Model</h2>
+<p>From the coefficients of our model, we can create the following linear regression formula:</p>
+<p>Time To Fall = 20.092 + 0.154(Dosage) + 2.463(Hour Hit) + 0.064(Dosage*Hour Hit)</p>
+<p>The coeficent for the intercept tells us that a primate that was hit with the average dosage during the average time of day would take 20.092 minutes to fall. For every one mg increase in ketamine dosage the primate was hit with, the time to fall increased by 0.154 minutes. For every one hour increase in the time the primate was hit, the time for the monkey to fall increased by 2.463 minutes. Additionally, for every one unit increase in the interaction between one mg of ketamine increase and one hour later, the monkey took 0.064 minutes longer to fall.</p>
+<pre class="r"><code># Plot the regression with the interactions package by holding one of the variables constant and plot the effect of the other on the response
+interact_plot(lin_mod,pred=hour_hit_c,modx=dosage_c)</code></pre>
+<p><img src="/project/project2_files/figure-html/Plotting%20Regression%20Model-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Testing assumption of linearity
+ggplot(aes(x=dosage,y=mins_to_fall),data=captures) + geom_point()+ labs(title=&quot;Test of Linearity Between Dosage and Minutes to Fall&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/Assessing%20Assumptions-1.png" width="768" style="display: block; margin: auto;" />
+We see that this is not a very linear relationship.</p>
+<pre class="r"><code>ggplot(aes(x=hour_hit,y=mins_to_fall),data=captures) + geom_point() + labs(title=&quot;Test of Linearity Between Dosage and Minutes to Fall&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/Assessing%20Assumptions%20Two-1.png" width="768" style="display: block; margin: auto;" />
+This has a better, more linear relationship.</p>
+<pre class="r"><code># Checking assumption of normality 
+qqnorm(lin_mod$residuals, main = &quot;QQ-plot of Model Residuals&quot;)
+qqline(lin_mod$residuals, col = &quot;red&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/Assessing%20Assumptions%20Three-1.png" width="768" style="display: block; margin: auto;" />
+There is a pretty good fit around the line, but a bit of spread near the end</p>
+<pre class="r"><code># Checking assumption of equal variance/homoscedasticity
+plot(lin_mod$fitted.values, lin_mod$residuals, xlab = &quot;Fitted Values&quot;, 
+    ylab = &quot;Residuals&quot;,main=&quot;Residual Plot&quot;, pch = 20)
+abline(h = 0, col = &quot;red&quot;)</code></pre>
+<p><img src="/project/project2_files/figure-html/Assessing%20Assumptions%20Four-1.png" width="768" style="display: block; margin: auto;" />
+The cloud of points is not symmetric at all, so we can definitely say that this assumption has been violated.</p>
+<pre class="r"><code># Recalculate with robust standard errors
+coeftest(lin_mod, vcov = vcovHC(lin_mod))[,1:2]</code></pre>
+<pre><code>##                       Estimate Std. Error
+## (Intercept)         20.0915251  6.5734989
+## dosage_c             0.1538150  0.1401348
+## hour_hit_c           2.4634051  2.6017957
+## dosage_c:hour_hit_c  0.0642795  0.0592840</code></pre>
+<p>After recomputing the regression results with robust standard errors, we get the above coefficients.</p>
+<p>The original linear model had the following coefficients:</p>
+<p>Coefficients:
+Estimate Std. Error t value Pr(&gt;|t|)<br />
+(Intercept) 20.09153 5.27461 3.809 0.0014 **
+dosage_c 0.15382 0.08894 1.729 0.1018<br />
+hour_hit_c 2.46341 1.72758 1.426 0.1720<br />
+dosage_c:hour_hit_c 0.06428 0.03257 1.974 0.0649 .</p>
+<p>None of the results were significant. The standard error for the intercept was 5.275 originally and changed to 6.573.The standard error for dosage centered was originally 0.089 and changed to 0.140. The standard error for hour hit centered was originally 1.728 and changed to 2.602. Lastly, the standard error for qthe interaction between dosage centered and hour hit centered was 0.033 originally and changed to 0.059. All variables’ standard errors increased when computed as robust standard errors. Larger standard errors will result in larger p values, but will not affect our model, as none of the original variables were significant.</p>
+<p><strong>Amount of the variance explained by the model:</strong></p>
+<p>The R squared value of the linear model is 0.1593, meaning that 15.93% of the variance is explained by this model.</p>
+</div>
+</div>
+<div id="regression-model-with-bootstrapped-standard-errors" class="section level1">
+<h1>Regression Model with Bootstrapped Standard Errors</h1>
+<pre class="r"><code># Linear regression with bootstrapping
+# Repeat 5000 times
+samp_distn&lt;-replicate(5000, {
+boot_linmod &lt;- sample_frac(captures_extra, replace=T) #take bootstrap sample of rows
+boot_fit &lt;- lm(formula=mins_to_fall~dosage_c*hour_hit_c, data = boot_linmod)#fit model on bootstrap sample
+coef(boot_fit) #save coefs
+})
+
+## Get estimated SEs
+samp_distn %&gt;% t %&gt;% as.data.frame %&gt;% summarize_all(sd)</code></pre>
+<pre><code>##   (Intercept)  dosage_c hour_hit_c dosage_c:hour_hit_c
+## 1    7.546273 0.2048043   2.782897          0.07465603</code></pre>
+<div id="interpreting-bootstrapped-standard-errors" class="section level2">
+<h2>Interpreting Bootstrapped Standard Errors</h2>
+<p>The standard deviation of the intercept estimates is shown above under the <code>(Intercept)</code> column, the the dosage centered estimates is shown above under the <code>dosage_c</code> column, the hour hit centered estimates is shown above under the <code>hour_hit_c</code> column, and the interaction between hour hit centered and dosage centered is shown above under the <code>dosage_c:hour_hit_c</code> column. For every variable except for the hour hit centered, the bootstrapped standard errors are greater than the original or the robust standard errors. This will result in larger p-values for these variables. Additionally, the standard error for hour hit centered is smaller than the robust standard errors but still larger than the original, so the p-value using these standard errors will be larger than the original. None of the variables significance will be affected since none were significant in the original model.</p>
+<pre class="r"><code># Just to be safe, we&#39;re going to make sure there are no extra columns in the captures dataset before moving on 
+captures &lt;- captures %&gt;% select(genus,sex, age_class,dosage, hour_hit,mins_to_fall,mins_to_release,ectoparasites)</code></pre>
+</div>
+</div>
+<div id="logistic-regression-model" class="section level1">
+<h1>Logistic Regression Model</h1>
+<p>For this logistic regression, we’ll be predicting sex (a binary variable) from time to fall and species. This will inform us if it is likely that one sex takes longer to fall than the other, or if one sex is darted more often in one species than the other.</p>
+<pre class="r"><code># Fit the model
+log_mod_two &lt;- glm(sex~mins_to_release+age_class, data=captures, family=binomial(link=&quot;logit&quot;))
+
+# Get the coefficients
+coeftest(log_mod_two)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -1.2731e+00 1.3478e+00 -0.9446 0.3449
+## mins_to_release 8.1247e-03 8.0558e-03 1.0085 0.3132
+## age_classJuvenile -9.2677e-01 1.3167e+00 -0.7039 0.4815
+## age_classSubadult 5.7033e-01 1.6090e+00 0.3545 0.7230
+## age_classSubadult or Adult 1.6409e+01 2.3995e+03 0.0068
+0.9945</code></pre>
+<pre class="r"><code># Get the predicted odds
+exp(coeftest(log_mod_two))</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) 2.7996e-01 3.8489e+00 0.3888 1.412
+## mins_to_release 1.0082e+00 1.0081e+00 2.7416 1.368
+## age_classJuvenile 3.9583e-01 3.7310e+00 0.4947 1.619
+## age_classSubadult 1.7689e+00 4.9978e+00 1.4254 2.061
+## age_classSubadult or Adult 1.3380e+07 Inf 1.0069 2.703</code></pre>
+<div id="interpreting-coefficient-estimates-in-context" class="section level2">
+<h2>Interpreting coefficient estimates in context</h2>
+<p>From this logistic regression, we see that none of the coefficients are significant. From the intercept, we can see that the log odds of being female for a monkey of the adult age class who took 0 minutes to release are -1.273, while the odds are .2780 For every one unit increase in the minutes to release, the log odds of being female increase by 0.008, while the odds increase by 1.008.</p>
+<p>Juvenile monkeys had a 0.927 log odds lower of being female, and 0.396 lower odds of being female than an adult monkey. Subadult monkeys had a 0.570 log odds higher of being female, and 1.769 higher odds of being female than an adult monkey. Monkeys in the age class “Subadult or adult” had a 16.409 log odds higher of being female, and 1.338e7 higher odds of being female than adults.</p>
+</div>
+<div id="confusion-matrix-and-measures-of-the-model" class="section level2">
+<h2>Confusion matrix and measures of the model</h2>
+<pre class="r"><code># Create a confusion matrix for the logistic regression
+# Grab the probabilities from the model 
+captures_extra &lt;- captures
+captures_extra$prob &lt;- predict(log_mod_two,type=&quot;response&quot;)
+captures_extra$predicted &lt;- ifelse(captures_extra$prob&gt;.5,&quot;female&quot;,&quot;male&quot;)
+table(truth=captures_extra$sex, prediction=captures_extra$predicted)%&gt;%addmargins</code></pre>
+<pre><code>##      prediction
+## truth female male Sum
+##   0        2    9  11
+##   1        5    5  10
+##   Sum      7   14  21</code></pre>
+<p>True positives (TP), the captures in which female was predicted and female was correct: 5</p>
+<p>True negatives (TN): the captures in which male was predicted and male was correct: 9</p>
+<p>False positives (FP): the captures in which female was predicted, but they were actually male: 2</p>
+<p>False negatives (FN): the captures in which male was predicted, but they were actually female: 5</p>
+<pre class="r"><code># Accuracy: Overall, how often was the model correct?
+## (TP+TN)/total
+(5+9)/21</code></pre>
+<pre><code>## [1] 0.6666667</code></pre>
+<pre class="r"><code># True Positive Rate (Sensitivity/Recall): When it&#39;s actually Female, how often does the model predict Female?
+# TP/Actual Female
+5/10</code></pre>
+<pre><code>## [1] 0.5</code></pre>
+<pre class="r"><code># True Negative Rate (Specificity): When it&#39;s actually male, how often does it predict male? 
+# TN/actual no
+9/11</code></pre>
+<pre><code>## [1] 0.8181818</code></pre>
+<pre class="r"><code># Positive Predictive Value (Precision): When it predicts female, how often is it correct?
+# TP/predicted F
+5/10</code></pre>
+<pre><code>## [1] 0.5</code></pre>
+<p><strong>Density Plot</strong></p>
+<pre class="r"><code># Density plot of log-odds colored/grouped by binary outcome variable
+captures_extra$logit&lt;-predict(log_mod_two,type=&quot;link&quot;)
+logit&lt;-function(p)log(odds(p))
+
+captures_extra%&gt;%ggplot()+geom_density(aes(logit,color=sex,fill=as.factor(sex)), alpha=.4)+
+  theme(legend.position=c(.85,.85))+geom_vline(xintercept=0)+xlab(&quot;logit (log-odds)&quot;)+
+  geom_rug(aes(logit,color=sex))</code></pre>
+<p><img src="/project/project2_files/figure-html/Density%20Plot-1.png" width="768" style="display: block; margin: auto;" />
+<strong>ROC Curve</strong></p>
+<pre class="r"><code># ROC Curve and AUC Calculation
+ROCplot&lt;-ggplot(captures_extra)+geom_roc(aes(d=sex,m=prob), n.cuts=0)
+ROCplot</code></pre>
+<p><img src="/project/project2_files/figure-html/Roc%20Curve-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Calculate the AUC (area under the curve)
+calc_auc(ROCplot)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.6545455</code></pre>
+<pre class="r"><code># Restore the data to its original condition
+#captures &lt;- captures %&gt;% select(-prob,-predicted,-logit)</code></pre>
+</div>
+<div id="interpretation-of-auc" class="section level2">
+<h2>Interpretation of AUC</h2>
+<p>The AUC for this model is 0.65, so this model is poor.</p>
+</div>
+</div>
+<div id="second-logistic-regression" class="section level1">
+<h1>Second Logistic Regression</h1>
+<pre class="r"><code># Build the model, predicting the binary response variable from ALL other variables
+log_mod_all &lt;- glm(sex~., data=captures, family=binomial(link=&quot;logit&quot;))
+
+coeftest(log_mod_all)</code></pre>
+<pre><code>##
+## z test of coefficients:
+##
+## Estimate Std. Error z value Pr(&gt;|z|)
+## (Intercept) -1.6511e+01 6.5226e+03 -0.0025 0.9980
+## genusCallicebus 1.7722e+01 6.5226e+03 0.0027 0.9978
+## genusLagothrix 2.6970e+01 6.5226e+03 0.0041 0.9967
+## genusPithecia 6.8581e-02 7.9568e+03 0.0000 1.0000
+## age_classJuvenile -1.0968e-01 1.6820e+00 -0.0652 0.9480
+## age_classSubadult -1.4569e+00 3.0736e+00 -0.4740 0.6355
+## age_classSubadult or Adult 1.7429e+01 6.5226e+03 0.0027
+0.9979
+## dosage -5.9207e-02 6.2791e-02 -0.9429 0.3457
+## hour_hit -6.3120e-02 2.8276e-01 -0.2232 0.8234
+## mins_to_fall 6.7871e-02 7.0719e-02 0.9597 0.3372
+## mins_to_release 8.5974e-03 1.1076e-02 0.7762 0.4376
+## ectoparasites -3.9013e+00 4.1137e+00 -0.9484 0.3429</code></pre>
+<pre class="r"><code># Reset the captures_extra dataset
+captures_extra &lt;- captures
+# Create a confusion matrix
+captures_extra$prob_logall &lt;- predict(log_mod_all,type=&quot;response&quot;)
+captures_extra$predicted_logall &lt;- ifelse(captures_extra$prob_logall&gt;.5,&quot;female&quot;,&quot;male&quot;)
+table(truth=captures_extra$sex, prediction=captures_extra$predicted_logall)%&gt;%addmargins</code></pre>
+<pre><code>##      prediction
+## truth female male Sum
+##   0        2    9  11
+##   1        7    3  10
+##   Sum      9   12  21</code></pre>
+<p>True positives (TP), the captures in which female was predicted and female was correct: 7</p>
+<p>True negatives (TN), the captures in which male was predicted and male was correct: 9</p>
+<p>False positives (FP), the captures in which female was predicted, but they were actually male: 2</p>
+<p>False negatives (FN), the captures in which male was predicted, but they were actually female: 3</p>
+<pre class="r"><code>#Accuracy: Overall, how often was the model correct? 
+## (TP+TN)/total
+(7+9)/21</code></pre>
+<pre><code>## [1] 0.7619048</code></pre>
+<pre class="r"><code># True Positive Rate (Sensitivity/Recall): When it&#39;s actually Female, how often does the model predict Female?
+## TP/Actual Female
+7/10</code></pre>
+<pre><code>## [1] 0.7</code></pre>
+<pre class="r"><code># True Negative Rate (Specificity): When it&#39;s actually male, how often does it predict male? 
+## TN/actual no
+9/11</code></pre>
+<pre><code>## [1] 0.8181818</code></pre>
+<pre class="r"><code># Positive Predictive Value (Precision): When it predicts female, how often is it correct?
+## TP/predicted F
+7/10</code></pre>
+<pre><code>## [1] 0.7</code></pre>
+<p><strong>ROC Curve</strong></p>
+<pre class="r"><code># ROC Curve and AUC Calculation
+ROCplot2&lt;-ggplot(captures_extra)+geom_roc(aes(d=sex,m=prob_logall), n.cuts=0)
+ROCplot2</code></pre>
+<p><img src="/project/project2_files/figure-html/ROC%20Two-1.png" width="768" style="display: block; margin: auto;" /></p>
+<pre class="r"><code># Calculate the AUC (area under the curve)
+calc_auc(ROCplot2)</code></pre>
+<pre><code>##   PANEL group       AUC
+## 1     1    -1 0.8272727</code></pre>
+<div id="interpretation-of-in-sample-classification-diagnostics" class="section level2">
+<h2>Interpretation of In-Sample Classification Diagnostics</h2>
+<p>The Accuracy, Sensitivity, Specificity, Precision are all between .7 and .82, meaning that this model is predicting sex well. The AUC is .827, showing that this model is very good at predicting our binary variable.</p>
+</div>
+<div id="ten-fold-cross-validation" class="section level2">
+<h2>Ten Fold Cross Validation</h2>
+<pre class="r"><code># Create the class_diag function
+class_diag&lt;-function(probs,truth){
+  
+  if(is.numeric(truth)==FALSE &amp; is.logical(truth)==FALSE) truth&lt;-as.numeric(truth)-1
+  
+  tab&lt;-table(factor(probs&gt;.5,levels=c(&quot;FALSE&quot;,&quot;TRUE&quot;)),truth)
+  prediction&lt;-ifelse(probs&gt;.5,1,0)
+  acc=mean(truth==prediction)
+  sens=mean(prediction[truth==1]==1)
+  spec=mean(prediction[truth==0]==0)
+  ppv=mean(truth[prediction==1]==1)
+  f1=2*(sens*ppv)/(sens+ppv)
+  
+  #CALCULATE EXACT AUC
+  ord&lt;-order(probs, decreasing=TRUE)
+  probs &lt;- probs[ord]; truth &lt;- truth[ord]
+  
+  TPR=cumsum(truth)/max(1,sum(truth)) 
+  FPR=cumsum(!truth)/max(1,sum(!truth))
+  
+  dup&lt;-c(probs[-1]&gt;=probs[-length(probs)], FALSE)
+  TPR&lt;-c(0,TPR[!dup],1); FPR&lt;-c(0,FPR[!dup],1)
+  
+  n &lt;- length(TPR)
+  auc&lt;- sum( ((TPR[-1]+TPR[-n])/2) * (FPR[-1]-FPR[-n]) )
+
+  data.frame(acc,sens,spec,ppv,auc)
+}
+
+
+# Run the 10 fold CV
+set.seed(1234)
+k=10
+
+#data&lt;-captures[sample(nrow(captures)),] #randomly order rows
+#folds&lt;-cut(seq(1:nrow(captures)),breaks=k,labels=F) #create folds
+data &lt;- captures %&gt;% sample_frac #put rows of dataset in random order
+folds &lt;- ntile(1:nrow(data),n=10) #create fold labels
+
+diags&lt;-NULL
+for(i in 1:k){
+  train &lt;- data[folds!=i,] #create training set (all but fold i)
+  test &lt;- data[folds==i,] #create test set (just fold i)
+  truth &lt;- test$sex #save truth labels from fold i
+  
+  log_mod_cv &lt;- glm(sex~., data=train, family=binomial(link=&quot;logit&quot;)) 
+  log_mod_cv$xlevels[[&quot;age_class&quot;]] &lt;- union(log_mod_cv$xlevels[[&quot;age_class&quot;]], levels(as.factor(test$age_class)))
+  log_mod_cv$xlevels[[&quot;genus&quot;]] &lt;- union(log_mod_cv$xlevels[[&quot;genus&quot;]], levels(as.factor(test$genus)))
+
+  probs &lt;- predict(log_mod_cv, newdata=test, type=&quot;response&quot;)
+  
+  #See how well truth matches the predictions of the model
+  diags&lt;-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##         acc sens spec ppv auc
+## 1 0.5166667  NaN  NaN NaN 0.5</code></pre>
+</div>
+<div id="interpretation-of-10-fold-cross-validation" class="section level2">
+<h2>Interpretation of 10 Fold Cross Validation</h2>
+<p>The accuracy for this model is shown above under the <code>acc</code> column. Sensitivity, specificity, and the positive predictive value were unable to be calculated. The previous, in-sample AUC was .8, and the AUC for this model is 0.5, showing that the previous model was overfit.</p>
+</div>
+<div id="lasso" class="section level2">
+<h2>LASSO</h2>
+<pre class="r"><code>#From WS 20 line 232
+y&lt;-as.matrix(captures$sex) #grab response
+x&lt;-model.matrix(sex~.,data=captures)[,-1] #predictors (drop intercept)
+#Scale your values (you should always do this)
+x &lt;- scale(x)
+#head(x)
+
+#picks an optimal value for lambda through 10-fold CV
+cv&lt;-cv.glmnet(x,y,family=&quot;binomial&quot;)
+lasso&lt;-glmnet(x,y,family=&quot;binomial&quot;,lambda=cv$lambda.1se)
+coef(lasso)</code></pre>
+<pre><code>## 12 x 1 sparse Matrix of class &quot;dgCMatrix&quot;
+##                                     s0
+## (Intercept)                -0.09531018
+## genusCallicebus             0.00000000
+## genusLagothrix              .         
+## genusPithecia               .         
+## age_classJuvenile           .         
+## age_classSubadult           .         
+## age_classSubadult or Adult  .         
+## dosage                      .         
+## hour_hit                    .         
+## mins_to_fall                .         
+## mins_to_release             .         
+## ectoparasites               .</code></pre>
+<p>The variable that is retained is genus Callicebus. This is the only significant predictor of sex, so we’re going to re run the ten fold CV on a logistic model predicting sex from genus only.</p>
+</div>
+<div id="ten-fold-cross-validation-with-lasso-variables" class="section level2">
+<h2>Ten Fold Cross Validation With LASSO Variables</h2>
+<pre class="r"><code># run this with only genus Callicebus as a predictor
+set.seed(1234)
+k=10
+
+data &lt;- captures %&gt;% sample_frac #put rows of dataset in random order
+folds &lt;- ntile(1:nrow(data),n=10) #create fold labels
+
+diags&lt;-NULL
+for(i in 1:k){
+  train &lt;- data[folds!=i,] #create training set (all but fold i)
+  test &lt;- data[folds==i,] #create test set (just fold i)
+  truth &lt;- test$sex #save truth labels from fold i
+  
+  log_mod_cv &lt;- glm(sex~genus, data=train, family=binomial(link=&quot;logit&quot;)) 
+  log_mod_cv$xlevels[[&quot;genus&quot;]] &lt;- union(log_mod_cv$xlevels[[&quot;genus&quot;]], levels(as.factor(test$genus)))
+
+  probs &lt;- predict(log_mod_cv, newdata=test, type=&quot;response&quot;)
+  
+  #See how well truth matches the predictions of the model
+  diags&lt;-rbind(diags,class_diag(probs,truth))
+}
+
+summarize_all(diags,mean)</code></pre>
+<pre><code>##   acc sens spec ppv auc
+## 1 0.3  NaN  NaN NaN 0.4</code></pre>
+<p>This model’s out-of-sample AUC is 0.4, whereas in the previous model it was 0.5. Therefore, this model using only the variables lasso specified performs worse on out of sample clssifications than the model that was predicting sex from every other variable. This may be because only the genus Callicebus was significant, but in order to create a model we had to predict sex from genus, which included the genera that were not significant predictors. These additional predictors may be what caused the AUC for this model to be lower than the previous model.</p>
+</div>
+</div>
+
+            
+        <hr>         <div class="related-posts">
+                <h5>Related Posts</h5>
+                
+              </div> 
+            </div>
+          </div>
+
+   <hr>  <div class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+
+    (function() {
+      
+      
+      if (window.location.hostname == "localhost")
+        return;
+
+      var disqus_shortname = '';
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com/" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div> 
+        </div>
+      </div>
+    </div>
+
+    
+    <footer>
+  <div id="footer">
+    <div class="container">
+      <p class="text-muted">&copy; All rights reserved. Powered by <a href="https://gohugo.io/">Hugo</a> and
+      <a href="http://www.github.com/nurlansu/hugo-sustain/">sustain</a> with ♥</p>
+    </div>
+  </div>
+</footer>
+<div class="footer"></div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+<script src="/js/docs.min.js"></script>
+<script src="/js/main.js"></script>
+
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+
+
+    
+  </body>
+</html>
